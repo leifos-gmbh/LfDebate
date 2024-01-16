@@ -1,0 +1,18 @@
+cat_create_xdbt#:#Create Debate
+crs_create_xdbt#:#Create Debate
+fold_create_xdbt#:#Create Debate
+grp_create_xdbt#:#Create Debate
+root_create_xdbt#:#Create Debate
+obj_xdbt#:#Debate
+obj_xdbt_duplicate#:#Copy
+obj_xdbt_select#:#Select Debate
+objs_xdbt#:#Debats
+objs_xdbt_duplicate#:#Copy Debats
+xdbt_add#:#Add Debate
+xdbt_copy#:#Copy Debate
+xdbt_delete#:#Delete Debate
+xdbt_edit_permission#:#Change permission settings
+xdbt_new#:#Add New Debate
+xdbt_read#:#Read access to Debate
+xdbt_visible#:#Debate is visible
+xdbt_write#:#Edit Debate
