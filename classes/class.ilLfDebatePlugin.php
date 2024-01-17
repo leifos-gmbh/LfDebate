@@ -24,4 +24,5 @@ class ilLfDebatePlugin extends ilRepositoryObjectPlugin
         return true;
     }
 
+
 }

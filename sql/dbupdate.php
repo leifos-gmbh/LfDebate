@@ -37,17 +37,11 @@ $fields = [
         "length" => 4,
         "notnull" => true,
         "default" => 0
-    ],
-    "depth" => [
-        "type" => "integer",
-        "length" => 2,
-        "notnull" => true,
-        "default" => 0
     ]
 ];
-if(!$ilDB->tableExists("rep_robj_xdbt_post_tree")) {
-    $ilDB->createTable("rep_robj_xdbt_post_tree", $fields);
-    $ilDB->addPrimaryKey("rep_robj_xdbt_post_tree", ["xdbt_obj_id", "child"]);
+if(!$ilDB->tableExists("xdbt_post_tree")) {
+    $ilDB->createTable("xdbt_post_tree", $fields);
+    $ilDB->addPrimaryKey("xdbt_post_tree", ["xdbt_obj_id", "child"]);
 }
 ?>
 <#3>
@@ -94,8 +88,8 @@ $fields = [
         "default" => 0
     ]
 ];
-if(!$ilDB->tableExists("rep_robj_xdbt_post_tree_node")) {
-    $ilDB->createTable("rep_robj_xdbt_post_tree_node", $fields);
-    $ilDB->addPrimaryKey("rep_robj_xdbt_post_tree_node", ["id"]);
+if(!$ilDB->tableExists("xdbt_post_tree")) {
+    $ilDB->createTable("xdbt_post_tree", $fields);
+    $ilDB->addPrimaryKey("xdbt_post_tree", ["id", "version"]);
 }
 ?>
