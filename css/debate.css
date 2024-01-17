@@ -1,0 +1,101 @@
+.debate-item-outer {
+    margin-bottom: 20px;
+}
+
+.il-item.debate-item {
+    border: 3px solid;
+    border-radius: 26px;
+    padding: 4px;
+}
+
+.il-item.debate-item.initial {
+    border-color: #8faedc;
+}
+
+.il-item.debate-item.pro {
+    border-color: #92dc8f;
+}
+
+.debate-glyph-pro {
+    color: #578356;
+}
+
+.il-item.debate-item.contra {
+    border-color: #dc8f8f;
+}
+
+.debate-glyph-contra {
+    color: #865656;
+}
+
+.il-item.debate-item.question {
+    border-color: #d3d3d3;
+}
+
+.il-item.debate-item.neutral {
+    border-color: #d3d3d3;
+}
+
+.debate-glyph-question {
+    color: #757575;
+}
+
+.debate-date {
+    font-size: 1.3rem;
+    color: #6f6f6f;
+    overflow: hidden;
+}
+
+.debate-item .il-item-title {
+    margin-top: 4px;
+}
+
+h3.debate-title {
+    font-size: 2rem;
+    margin: 12px 10px 8px 10px;
+}
+
+.debate-text {
+    font-size: 1.2rem;
+    margin: 0 8px 5px 8px;
+    padding: 4px;
+}
+
+.debate-comments {
+    margin: 0 14px 15px 30px;
+}
+
+.debate-comment-outer {
+    padding: 4px;
+    border-radius: 26px;
+    background-color: #f6f6f6;
+}
+
+.il-item.debate-comment {
+    background-color: transparent;
+    padding:0px;
+}
+
+.debate-reply {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.debate-reply .btn-default {
+    border-radius: 15px;
+    font-size: 0.8rem;
+    padding: 4px 10px;
+}
+
+.debate-item .btn-default {
+    border-radius: 15px;
+    font-size: 0.8rem;
+    padding: 4px 10px;
+}
+
+.debate-glyphs {
+    text-align: right;
+    margin-top: 0px;
+    margin-right: 17px;
+    margin-bottom: 10px;
+}

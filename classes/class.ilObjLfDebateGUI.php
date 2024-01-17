@@ -20,6 +20,32 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
     }
 
+    protected function uiTest()
+    {
+        global $DIC;
+
+        $f = $DIC->ui()->factory();
+        $avatar = $f->symbol()->avatar()->letter("Test User");
+        $posting_ui = new \Leifos\Debate\Posting\PostingUI(
+            $this->plugin,
+            \Leifos\Debate\Posting\PostingUI::TYPE_INITIAL,
+            $avatar,
+            "Test User",
+            "12. Oct 2024",
+            "First Posting",
+            "This is the first posting",
+            ""
+        );
+        $this->tpl->setContent($posting_ui->render());
+        $this->tpl->printToStdout();
+    }
+
+    public function executeCommand()
+    {
+        //$this->uiTest(); return;
+        parent::executeCommand();
+    }
+
     final public function getType(): string
     {
         return ilLfDebatePlugin::ID;
