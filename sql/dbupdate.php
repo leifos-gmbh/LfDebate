@@ -46,6 +46,10 @@ if(!$ilDB->tableExists("xdbt_post_tree")) {
 ?>
 <#3>
 <?php
+
+?>
+<#4>
+<?php
 $fields = [
     "id" => [
         "type" => "integer",
@@ -88,8 +92,8 @@ $fields = [
         "default" => 0
     ]
 ];
-if(!$ilDB->tableExists("xdbt_post_tree")) {
-    $ilDB->createTable("xdbt_post_tree", $fields);
-    $ilDB->addPrimaryKey("xdbt_post_tree", ["id", "version"]);
+if(!$ilDB->tableExists("xdbt_posting")) {
+    $ilDB->createTable("xdbt_posting", $fields);
+    $ilDB->addPrimaryKey("xdbt_posting", ["id", "version"]);
 }
 ?>
