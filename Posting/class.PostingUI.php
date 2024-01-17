@@ -58,6 +58,11 @@ class PostingUI
      */
     protected $title = "";
 
+    /**
+     * @var array
+     */
+    protected $actions = [];
+
     public function __construct(
         \ilPlugin $plugin,
         string $type,
@@ -77,11 +82,19 @@ class PostingUI
         $this->plugin = $plugin;
     }
 
+    public function withActions(array $actions):self
+    {
+        $clone = clone($this);
+        $clone->actions = $actions;
+        return $clone;
+    }
+
     public function render() : string
     {
         global $DIC;
 
         $r = $DIC->ui()->renderer();
+        $f = $DIC->ui()->factory();
 
         $DIC->ui()->mainTemplate()->addCss(
             "./Customizing/global/plugins/Services/Repository/RepositoryObject/LfDebate/css/debate.css");
@@ -105,6 +118,19 @@ class PostingUI
         }
         if ($glyph !== "") {
             $glyph = '<span class="glyphicon '. $glyph .'" aria-hidden="true"></span> ';
+        }
+
+        if (count($this->actions) > 0) {
+            $action_html = "";
+            foreach ($this->actions as $c) {
+                if ($action_html !== "") {
+                    $action_html .= trim($r->render($f->divider()->vertical()));
+                }
+                $action_html .= trim($r->render($c));
+            }
+            $tpl->setCurrentBlock("actions");
+            $tpl->setVariable("ACTIONS", $action_html);
+            $tpl->parseCurrentBlock();
         }
 
         $tpl->setVariable("NAME", $this->name);

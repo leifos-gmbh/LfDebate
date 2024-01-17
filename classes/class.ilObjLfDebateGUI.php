@@ -26,6 +26,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
         $f = $DIC->ui()->factory();
         $avatar = $f->symbol()->avatar()->letter("Test User");
+        //$avatar = $f->symbol()->avatar()->picture("./templates/default/images/HeaderIcon.svg" ,"ILIAS");
         $posting_ui = new \Leifos\Debate\Posting\PostingUI(
             $this->plugin,
             \Leifos\Debate\Posting\PostingUI::TYPE_INITIAL,
@@ -36,6 +37,10 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             "This is the first posting",
             ""
         );
+        $posting_ui = $posting_ui->withActions([
+            $f->button()->shy("Edit", "#"),
+            $f->button()->shy("Delete", "#")
+        ]);
         $this->tpl->setContent($posting_ui->render());
         $this->tpl->printToStdout();
     }
