@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-namespace Leifos\Debate\Posting;
+namespace Leifos\Debate;
 
 use ILIAS\UI\Component\Symbol\Avatar\Avatar;
 

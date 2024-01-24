@@ -1,5 +1,29 @@
 <?php
 
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
+declare(strict_types=1);
+
+use Leifos\Debate\PostingManager;
+use Leifos\Debate\GUIFactory;
+use ILIAS\UI;
+use ILIAS\UI\Component\Input\Container\Form\Form;
+use Psr\Http\Message\ServerRequestInterface;
+
 include_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
 require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/LfDebate/classes/class.ilLfDebatePlugin.php");
 require_once("./Services/Form/classes/class.ilPropertyFormGUI.php");
@@ -15,34 +39,52 @@ require_once("./Services/Form/classes/class.ilNonEditableValueGUI.php");
  */
 class ilObjLfDebateGUI extends ilObjectPluginGUI
 {
-    protected function afterConstructor(): void
-    {
+    /**
+     * @var PostingManager
+     */
+    protected $manager;
 
-    }
+    /**
+     * @var GUIFactory
+     */
+    protected $gui;
 
-    protected function uiTest()
+    /**
+     * @var UI\Factory
+     */
+    protected $ui_fac;
+
+    /**
+     * @var UI\Renderer
+     */
+    protected $ui_ren;
+
+    /**
+     * @var ServerRequestInterface
+     */
+    protected $request;
+
+    public function __construct($a_ref_id = 0, $a_id_type = self::REPOSITORY_NODE_ID, $a_parent_node_id = 0)
     {
         global $DIC;
 
-        $f = $DIC->ui()->factory();
-        $avatar = $f->symbol()->avatar()->letter("Test User");
-        //$avatar = $f->symbol()->avatar()->picture("./templates/default/images/HeaderIcon.svg" ,"ILIAS");
-        $posting_ui = new \Leifos\Debate\Posting\PostingUI(
-            $this->plugin,
-            \Leifos\Debate\Posting\PostingUI::TYPE_INITIAL,
-            $avatar,
-            "Test User",
-            "12. Oct 2024",
-            "First Posting",
-            "This is the first posting",
-            ""
-        );
-        $posting_ui = $posting_ui->withActions([
-            $f->button()->shy("Edit", "#"),
-            $f->button()->shy("Delete", "#")
-        ]);
-        $this->tpl->setContent($posting_ui->render());
-        $this->tpl->printToStdout();
+        parent::__construct($a_ref_id, $a_id_type, $a_parent_node_id);
+
+        $this->ui_fac = $DIC->ui()->factory();
+        $this->ui_ren = $DIC->ui()->renderer();
+        $this->request = $DIC->http()->request();
+
+        $plugin = new ilLfDebatePlugin();
+        $this->gui = $plugin->gui();
+
+        if ($this->object) {
+            $this->manager = $plugin->domain()->posting($this->object->getId());
+        }
+    }
+
+    protected function afterConstructor(): void
+    {
+
     }
 
     public function executeCommand()
@@ -64,12 +106,10 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
     {
         switch ($cmd) {
             case "editProperties":
-            case "updateProperties":
-            case "saveProperties":
                 $this->checkPermission("write");
                 $this->$cmd();
                 break;
-            case "showContent":
+            case "showAllPostings":
             default:
                 $this->checkPermission("read");
                 $this->$cmd();
@@ -84,25 +124,22 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
     public function getStandardCmd(): string
     {
-        return "showContent";
+        return "showAllPostings";
     }
 
     public function setTabs(): void
     {
-        $ilCtrl = $this->ctrl;
-        $ilAccess = $this->access;
-
-        if ($ilAccess->checkAccess("read", "", $this->object->getRefId())) {
+        if ($this->access->checkAccess("read", "", $this->object->getRefId())) {
             $this->tabs->addTab(
-                "content", $this->txt("content"), $ilCtrl->getLinkTarget($this, "showContent")
+                "content", $this->txt("Beitragsübersicht"), $this->ctrl->getLinkTarget($this, "showAllPostings")
             );
         }
 
         $this->addInfoTab();
 
-        if ($ilAccess->checkAccess("write", "", $this->object->getRefId())) {
+        if ($this->access->checkAccess("write", "", $this->object->getRefId())) {
             $this->tabs->addTab(
-                "properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties")
+                "properties", $this->txt("properties"), $this->ctrl->getLinkTarget($this, "editProperties")
             );
         }
 
@@ -112,101 +149,302 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
     protected function editProperties(): void
     {
-        $this->tabs->activateTab("properties");
-        $form = $this->initPropertiesForm();
-        $this->addValuesToForm($form);
-        $this->tpl->setContent($form->getHTML());
-    }
-
-    protected function initPropertiesForm(): ilPropertyFormGUI
-    {
-        $form = new ilPropertyFormGUI();
-        $form->setTitle($this->plugin->txt("obj_xdbt"));
-
-        $title = new ilTextInputGUI($this->txt("title"), "title");
-        $title->setRequired(true);
-        $form->addItem($title);
-
-        $description = new ilTextInputGUI($this->txt("description"), "description");
-        $form->addItem($description);
-
-        $online = new ilCheckboxInputGUI($this->txt("online"), "online");
-        $form->addItem($online);
-
-        $form->setFormAction($this->ctrl->getFormAction($this, "saveProperties"));
-        $form->addCommandButton("saveProperties", $this->txt("update"));
-
-        return $form;
-    }
-
-    protected function addValuesToForm(ilPropertyFormGUI $form): void
-    {
         /** @var ilObjLfDebate $object */
         $object = $this->object;
-        $form->setValuesByArray([
-            "title" => $object->getTitle(),
-            "description" => $object->getDescription(),
-            "online" => $object->isOnline(),
-        ]);
-    }
 
-    protected function saveProperties(): void
-    {
-        $form = $this->initPropertiesForm();
-        $form->setValuesByPost();
-        if ($form->checkInput()) {
-            /** @var ilObjLfDebate $object */
-            $object = $this->object;
-            $this->fillObject($object, $form);
-            $object->update();
-            ilUtil::sendSuccess($this->txt("msg_object_modified"), true);
+        $this->tabs->activateTab("properties");
+
+        //inputs
+        $title = $this->ui_fac->input()->field()->text($this->txt("title"))
+                                                ->withValue($object->getTitle())
+                                                ->withRequired(true);
+
+        $description = $this->ui_fac->input()->field()->textarea($this->txt("description"))
+                                                      ->withValue($object->getDescription());
+
+        $online = $this->ui_fac->input()->field()->checkbox(
+            $this->txt("online")
+        )->withValue($object->isOnline());
+
+        //section
+        $section_properties = $this->ui_fac->input()->field()->section(
+            ["title" => $title,
+             "description" => $description,
+             "online" => $online],
+            $this->plugin->txt("obj_xdbt")
+        );
+
+        // form and form action handling
+        $this->ctrl->setParameterByClass(
+            "ilobjlfdebategui",
+            "debate_props",
+            "debate_props_config"
+        );
+
+        $form = $this->ui_fac->input()->container()->form()->standard(
+            $this->ctrl->getFormAction($this, "editProperties"),
+            ["section_props" => $section_properties]
+        );
+
+        if ($this->request->getMethod() === "POST"
+            && $this->request->getQueryParams()["debate_props"] === "debate_props_config") {     //in GUIRequest aufnehmen
+            $this->checkPermission("write");
+
+            $form = $form->withRequest($this->request);
+            $data = $form->getData();
+
+            if (isset($data["section_props"]) && is_array($data["section_props"])) {
+                $props = $data["section_props"];
+                $object->setTitle($props["title"]);
+                $object->setDescription($props["description"]);
+                $object->setOnline((bool) $props["online"]);
+                $object->update();
+
+                $this->tpl->setOnScreenMessage("success", $this->txt("msg_object_modified"), true);
+            } else {
+                $this->tpl->setContent($this->ui_ren->render($form));
+                return;
+            }
+
             $this->ctrl->redirect($this, "editProperties");
         }
-        $this->tpl->setContent($form->getHTML());
+
+        $this->tpl->setContent($this->ui_ren->render([$form]));
     }
 
-    protected function showContent(): void
+    protected function showAllPostings(): void
     {
-        $ilCtrl = $this->ctrl;
-        $ilToolbar = $this->toolbar;
-
-        $ilToolbar->addButton("Beitrag hinzufügen", $ilCtrl->getLinkTarget($this, "addPost"));
+        $add_post_button = ilLinkButton::getInstance();
+        $add_post_button->setCaption("Beitrag hinzufügen");
+        $add_post_button->setUrl($this->ctrl->getLinkTarget($this, "addPosting"));
+        $this->toolbar->addButtonInstance($add_post_button);
 
         $this->tabs->activateTab("content");
 
-        /** @var ilObjLfDebate $object */
-        $object = $this->object;
+        $html = "";
+        foreach ($this->manager->getTopPostings() as $top_posting) {
+            $avatar = ilObjUser::_getAvatar($top_posting->getUserId());
+            $posting_ui = $this->gui->posting(
+                $this->plugin,
+                $top_posting->getType(),
+                $avatar,
+                ilObjUser::_lookupFullname($top_posting->getUserId()),
+                $top_posting->getCreateDate(),
+                $top_posting->getTitle(),
+                $top_posting->getDescription(),
+                //""
+            );
+            $this->ctrl->setParameter($this, "post_id", $top_posting->getId());
+            $posting_ui = $posting_ui->withActions([
+                $this->ui_fac->button()->shy("Öffnen", $this->ctrl->getLinkTarget($this, "showPosting")),
+                $this->ui_fac->button()->shy("Bearbeiten", $this->ctrl->getLinkTarget($this, "editPosting")),
+                $this->ui_fac->button()->shy("?Löschen?", "#")
+            ]);
+            //$this->ctrl->setParameter($this, "post_id", "");
+            $this->ctrl->clearParameterByClass(self::class, "post_id");
 
-        $form = new ilPropertyFormGUI();
-        $form->setTitle($object->getTitle());
+            $html .= $posting_ui->render();
+        }
 
-        $i = new ilNonEditableValueGUI($this->txt("title"));
-        $i->setInfo($object->getTitle());
-        $form->addItem($i);
-
-        $i = new ilNonEditableValueGUI($this->txt("description"));
-        $i->setInfo($object->getDescription());
-        $form->addItem($i);
-
-        $i = new ilNonEditableValueGUI($this->txt("online"));
-        $i->setInfo($object->isOnline() ? "Online" : "Offline");
-        $form->addItem($i);
-
-        $this->tpl->setContent($form->getHTML());
+        $this->tpl->setContent($html);
+        //$this->tpl->printToStdout();
     }
 
-    protected function fillObject(ilObjLfDebate $object, ilPropertyFormGUI $form): void
+    protected function showPosting(): void
     {
-        $object->setTitle($form->getInput("title"));
-        $object->setDescription($form->getInput("description"));
-        $object->setOnline($form->getInput("online"));
+        $this->tabs->clearTargets();
+        $this->tabs->setBackTarget(
+            "Beitragsübersicht",
+            $this->ctrl->getLinkTarget($this, "showAllPostings")
+        );
+
+        $posting_id = $this->gui->request()->getPostingId();
+        //var_dump($posting_id); exit;
+        $top_posting = $this->manager->getPosting($posting_id);
+
+        $html = "";
+        $avatar = ilObjUser::_getAvatar($top_posting->getUserId());
+        $posting_ui = $this->gui->posting(
+            $this->plugin,
+            $top_posting->getType(),
+            $avatar,
+            ilObjUser::_lookupFullname($top_posting->getUserId()),
+            $top_posting->getCreateDate(),
+            $top_posting->getTitle(),
+            $top_posting->getDescription(),
+        //""
+        );
+        $this->ctrl->setParameter($this, "post_id", $top_posting->getId());
+        $posting_ui = $posting_ui->withActions([
+            $this->ui_fac->button()->shy("Bearbeiten", $this->ctrl->getLinkTarget($this, "editComment")),
+            $this->ui_fac->button()->shy("?Löschen?", "#")
+        ]);
+        $this->ctrl->clearParameterByClass(self::class, "post_id");
+
+        $html .= $posting_ui->render();
+
+        $add_comment_button = $this->ui_fac->button()->standard("Kommentar hinzufügen (aktuell ohne Funktion)", "#");
+        $html .= $this->ui_ren->render($add_comment_button);
+
+        foreach ($this->manager->getCommentsOfTopPosting($posting_id) as $comment) {
+            $avatar = ilObjUser::_getAvatar($comment->getUserId());
+            $comments_ui = $this->gui->posting(
+                $this->plugin,
+                $comment->getType(),
+                $avatar,
+                ilObjUser::_lookupFullname($comment->getUserId()),
+                $comment->getCreateDate(),
+                $comment->getTitle(),
+                $comment->getDescription(),
+            //""
+            );
+            $this->ctrl->setParameter($this, "comment_id", $comment->getId());
+            //$this->ctrl->setParameter($this, "post_id", $top_posting->getId());
+            $comments_ui = $comments_ui->withActions([
+                $this->ui_fac->button()->shy("Kommentar hinzufügen", $this->ctrl->getLinkTarget($this, "addComment")),
+                $this->ui_fac->button()->shy("Bearbeiten", $this->ctrl->getLinkTarget($this, "editComment")),
+                $this->ui_fac->button()->shy("?Löschen?", "#")
+            ]);
+            $this->ctrl->clearParameterByClass(self::class, "comment_id");
+            //$this->ctrl->clearParameterByClass(self::class, "post_id");
+
+            $html .= $comments_ui->render();
+        }
+
+        $this->tpl->setContent($html);
+        //$this->tpl->printToStdout();
     }
 
-    protected function addPost(): void
+    protected function addPosting(): void
     {
-        $ilCtrl = $this->ctrl;
+        $this->addOrEditPosting();
+    }
 
-        ilUtil::sendInfo("Post created", true);
-        $ilCtrl->redirect($this, "showContent");
+    protected function editPosting(): void
+    {
+        $this->addOrEditPosting(true);
+    }
+
+    protected function addOrEditPosting(bool $edit = false, int $parent_id = 0): void
+    {
+        $this->tabs->clearTargets();
+        if ($parent_id > 0) {
+            $this->ctrl->setParameter($this, "post_id", $parent_id);
+            $this->tabs->setBackTarget(
+                $this->lng->txt("back"),
+                $this->ctrl->getLinkTarget($this, "showPosting")
+            );
+            $this->ctrl->clearParameterByClass(self::class, "post_id");
+        } else {
+            $this->tabs->setBackTarget(
+                $this->lng->txt("back"),
+                $this->ctrl->getLinkTarget($this, "showAllPostings")
+            );
+        }
+        $this->checkPermission("write");
+
+        $this->tpl->setContent($this->ui_ren->render($this->initPostingForm($edit)));
+    }
+
+    protected function editComment()
+    {
+        $parent_id = $this->gui->request()->getPostingId();
+        $this->addOrEditPosting(true, $parent_id);
+    }
+
+    protected function initPostingForm(bool $edit = false): Form
+    {
+        if ($edit) {
+            $posting_id = $this->gui->request()->getPostingId();
+            $posting = $this->manager->getPosting($posting_id);
+        }
+
+        $title = $this->ui_fac->input()->field()->text($this->lng->txt("title"))->withRequired(true);
+        if ($edit) {
+            $title = $title->withValue($posting->getTitle());
+        }
+
+        $description = $this->ui_fac->input()->field()->textarea($this->lng->txt("description"));
+        if ($edit) {
+            $description = $description->withValue($posting->getDescription());
+        }
+
+        $section_title = $edit ? $this->txt("update_posting") : $this->lng->txt("add_posting");
+        $section = $this->ui_fac->input()->field()->section(
+            ["title" => $title,
+             "description" => $description],
+            $section_title
+        );
+
+        if ($edit) {
+            $this->ctrl->setParameter($this, "post_id", $posting_id);
+            $form_action = $this->ctrl->getLinkTarget($this, "updatePosting");
+            $this->ctrl->clearParameterByClass(self::class, "post_id");
+        } else {
+            $form_action = $this->ctrl->getLinkTarget($this, "createPosting");
+        }
+
+        return $this->ui_fac->input()->container()->form()->standard($form_action, ["props" => $section]);
+    }
+
+    protected function savePosting(bool $edit = false): void
+    {
+        $form = $this->initPostingForm();
+        if ($this->request->getMethod() === "POST") {
+            $form = $form->withRequest($this->request);
+            $data = $form->getData();
+            if (isset($data["props"]) && is_array($data["props"])) {
+                $props = $data["props"];
+                if ($edit) {
+                    $posting_id = $this->gui->request()->getPostingId();
+                    $posting = $this->manager->getPosting($posting_id);
+                    $this->manager->editPosting(
+                        $posting->getId(),
+                        $props["title"],
+                        $props["description"]
+                    );
+                } else {
+                    $this->manager->createTopPosting(
+                        $props["title"],
+                        $props["description"]
+                    );
+                }
+
+                $this->tpl->setOnScreenMessage("success", $this->lng->txt("msg_obj_modified"), true);
+            } else {
+                $this->tpl->setContent($this->ui_ren->render($form));
+                $this->tabs->clearTargets();
+                //if ($parent_id > 0) {
+                //    $this->ctrl->setParameter($this, "post_id", $parent_id);
+                //    $this->tabs->setBackTarget(
+                //        $this->lng->txt("back"),
+                //        $this->ctrl->getLinkTarget($this, "showPosting")
+                //    );
+                //    $this->ctrl->clearParameterByClass(self::class, "post_id");
+                //} else {
+                    $this->tabs->setBackTarget(
+                        $this->lng->txt("back"),
+                        $this->ctrl->getLinkTarget($this, "showAllPostings")
+                    );
+                //}
+                return;
+            }
+        }
+        if ($edit) {
+            $this->ctrl->setParameter($this, "post_id", $posting_id);
+            $this->ctrl->redirect($this, "showPosting");
+            $this->ctrl->clearParameterByClass(self::class, "post_id");
+        }
+        $this->ctrl->redirect($this, "showAllPostings");
+    }
+
+    protected function createPosting(): void
+    {
+        $this->savePosting();
+    }
+
+    protected function updatePosting(): void
+    {
+        $this->savePosting(true);
     }
 }

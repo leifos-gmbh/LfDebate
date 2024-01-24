@@ -18,18 +18,14 @@
 
 declare(strict_types=1);
 
-namespace Leifos\Debate\Posting;
+namespace Leifos\Debate;
 
 class Posting
 {
     /**
-     * @var string
-     */
-    protected $title;
-    /**
      * @var int
      */
-    protected $version;
+    protected $obj_id;
     /**
      * @var int
      */
@@ -37,35 +33,85 @@ class Posting
     /**
      * @var int
      */
-    protected $obj_id;
+    protected $user_id;
+    /**
+     * @var string
+     */
+    protected $title;
+    /**
+     * @var string
+     */
+    protected $description;
+    /**
+     * @var string
+     */
+    protected $type;
+    /**
+     * @var string
+     */
+    protected $create_date;
+    /**
+     * @var int
+     */
+    protected $version;
 
     public function __construct(
         int $obj_id,
         int $id,
-        int $version,
-        string $title
-    )
-    {
+        int $user_id,
+        string $title,
+        string $description,
+        string $type,
+        string $create_date,
+        int $version
+    ) {
         $this->obj_id = $obj_id;
         $this->id = $id;
-        $this->version = $version;
+        $this->user_id = $user_id;
         $this->title = $title;
+        $this->description = $description;
+        $this->type = $type;
+        $this->create_date = $create_date;
+        $this->version = $version;
     }
 
-    public function getObjId() : int
+    public function getObjId(): int
     {
         return $this->obj_id;
     }
-    public function getId() : int
+
+    public function getId(): int
     {
         return $this->id;
     }
-    public function getVersion() : int
+
+    public function getUserId(): int
     {
-        return $this->version;
+        return $this->user_id;
     }
-    public function getTitle() : string
+
+    public function getTitle(): string
     {
         return $this->title;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function getCreateDate(): string
+    {
+        return $this->create_date;
+    }
+
+    public function getVersion(): int
+    {
+        return $this->version;
     }
 }

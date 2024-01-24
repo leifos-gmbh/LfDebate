@@ -20,9 +20,6 @@ declare(strict_types=1);
 
 namespace Leifos\Debate;
 
-use Leifos\Debate\Posting\PostingDBRepo;
-use Leifos\Debate\DataFactory;
-
 class RepoFactory
 {
     /**
@@ -43,7 +40,7 @@ class RepoFactory
         $this->db = $db;
     }
 
-    public function posting():PostingDBRepo
+    public function posting(): PostingDBRepo
     {
         return new PostingDBRepo(
             $this->data,

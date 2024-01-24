@@ -20,10 +20,7 @@ declare(strict_types=1);
 
 namespace Leifos\Debate;
 
-use Leifos\Debate\DataFactory;
-use Leifos\Debate\RepoFactory;
 use ILIAS\DI\Container;
-
 use ILIAS\DI\RBACServices;
 use ILIAS\DI\LoggingServices;
 use ILIAS\Filesystem\Filesystems;
@@ -59,11 +56,12 @@ class DomainFactory
     // debate domain
     //
 
-    public function posting(int $obj_id):PostingManager
+    public function posting(int $obj_id): PostingManager
     {
         return new PostingManager(
             $this->data,
             $this->repo,
+            $this,
             $obj_id
         );
     }
@@ -131,7 +129,6 @@ class DomainFactory
     {
         return $this->DIC["objDefinition"];
     }
-
 
     public function objectDataCache(): \ilObjectDataCache
     {

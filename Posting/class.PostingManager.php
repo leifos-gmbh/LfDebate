@@ -18,26 +18,22 @@
 
 declare(strict_types=1);
 
-namespace Leifos\Debate\Posting;
-
-use Leifos\Debate\DataFactory;
-use Leifos\Debate\RepoFactory;
-use Leifos\Debate\Posting\Posting;
+namespace Leifos\Debate;
 
 class PostingManager
 {
     /**
      * @var DataFactory
      */
-    protected $repo;
-    /**
-     * @var DataFactory
-     */
     protected $data;
     /**
-     * @var \ilDBInterface
+     * @var RepoFactory
      */
-    protected $db;
+    protected $repo;
+    /**
+     * @var DomainFactory
+     */
+    protected $domain;
 
     /**
      * @var int repository object id
@@ -46,22 +42,134 @@ class PostingManager
 
     public function __construct(
         DataFactory $data,
-        DataFactory $repo,
+        RepoFactory $repo,
+        DomainFactory $domain,
         int $obj_id
     )
     {
         $this->data = $data;
         $this->repo = $repo;
+        $this->domain = $domain;
         $this->obj_id = $obj_id;
     }
 
     /**
      * @return Posting[]
      */
-    public function getTopPostings() : array
+    public function getTopPostings(): array
     {
-        return $this->repo->posting()->getTopPostings($this->obj_id);
+        return $this->repo->posting()->getTopEntries($this->obj_id);
     }
 
+    /**
+     * @return Posting[]
+     */
+    public function getCommentsOfTopPosting(int $id): array
+    {
+        return $this->repo->posting()->getSubEntries($this->obj_id, $id);
+    }
 
+    /**
+     * @return Posting[]
+     */
+    public function getSubCommentsOfComment(int $id): array                   // notwendig? oder reicht getComments?
+    {
+        return $this->repo->posting()->getSubEntries($this->obj_id, $id);
+    }
+
+    public function getPosting(int $id, ?int $version = null): Posting
+    {
+        if (!$version) {
+            $version = $this->getCurrentVersionOfPosting($id);
+        }
+        return $this->repo->posting()->getPosting($this->obj_id, $id, $version);
+    }
+
+    public function createTopPosting(string $title, string $description): void {
+        $user_id = $this->domain->user()->getId();
+        $posting_id = $this->repo->posting()->create(
+            $user_id,
+            $title,
+            $description,
+            PostingUI::TYPE_INITIAL,
+            \ilUtil::now()
+        );
+
+        $this->repo->posting()->addToTree(
+            $this->obj_id,
+            $posting_id
+        );
+    }
+
+    public function createCommentPosting(
+        int $parent_id,
+        string $title,
+        string $description,
+        string $type
+    ): void {
+        $user_id = $this->domain->user()->getId();
+        $posting_id = $this->repo->posting()->create(
+            $user_id,
+            $title,
+            $description,
+            $type,
+            \ilUtil::now()
+        );
+
+        $this->repo->posting()->addToTree(
+            $this->obj_id,
+            $posting_id,
+            $parent_id
+        );
+    }
+
+                                  // brauchen wir diese extra Methode für Sub Comments oder die für Comments benutzen?
+    public function createSubCommentPosting(
+        int $parent_id,
+        string $title,
+        string $description,
+        string $type
+    ): void {
+        $user_id = $this->domain->user()->getId();
+        $posting_id = $this->repo->posting()->create(
+            $user_id,
+            $title,
+            $description,
+            $type,
+            \ilUtil::now()
+        );
+
+        $this->repo->posting()->addToTree(
+            $this->obj_id,
+            $posting_id,
+            $parent_id
+        );
+    }
+
+    public function editPosting(
+        int $id,
+        string $new_title,
+        string $new_description
+    ): void {
+        $user_id = $this->domain->user()->getId();
+        $this->repo->posting()->createNewVersion(
+            $id,
+            $user_id,
+            $new_title,
+            $new_description,
+            $this->getCurrentTypeOfPosting($id),                           // soll der Typ editierbar sein?
+            \ilUtil::now(),
+            $this->getCurrentVersionOfPosting($id) + 1
+        );
+    }
+
+    public function getCurrentTypeOfPosting(int $id): string
+    {
+        return $this->repo->posting()->getCurrentType($id);
+    }
+
+    protected function getCurrentVersionOfPosting(int $id): int
+    {
+        return $this->repo->posting()->getMaxVersion($id);
+    }
 }

@@ -1,11 +1,29 @@
 <?php
 
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
+declare(strict_types=1);
+
 include_once("./Services/Repository/classes/class.ilObjectPluginAccess.php");
 
 /**
  * @author Thomas Famula <famula@leifos.de>
  */
-class ilObjLfDebateAccess extends ilObjectPluginAccess //implements ilConditionHandling          -> wofür ist das?
+class ilObjLfDebateAccess extends ilObjectPluginAccess //implements ilConditionHandling            -> wofür ist das?
 {
 
     /**
@@ -24,7 +42,7 @@ class ilObjLfDebateAccess extends ilObjectPluginAccess //implements ilConditionH
 
         switch ($a_permission) {
             case "read":
-                if (!self::checkOnline($a_obj_id) &&
+                if (!self::checkOnline((int) $a_obj_id) &&
                     !$ilAccess->checkAccessOfUser($a_user_id, "write", "", $a_ref_id)) {
                     return false;
                 }
@@ -40,8 +58,8 @@ class ilObjLfDebateAccess extends ilObjectPluginAccess //implements ilConditionH
         $ilDB = $DIC->database();
 
         $set = $ilDB->query(
-            "SELECT is_online FROM rep_robj_xdbt_data " .
-            " WHERE id = " . $ilDB->quote($id, "integer")
+            "SELECT is_online FROM xdbt_data " .
+            " WHERE obj_id = " . $ilDB->quote($id, "integer")
         );
         $rec = $ilDB->fetchAssoc($set);
         return (bool) $rec["is_online"];

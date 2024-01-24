@@ -46,7 +46,6 @@ if(!$ilDB->tableExists("xdbt_post_tree")) {
 ?>
 <#3>
 <?php
-
 ?>
 <#4>
 <?php
@@ -95,5 +94,23 @@ $fields = [
 if(!$ilDB->tableExists("xdbt_posting")) {
     $ilDB->createTable("xdbt_posting", $fields);
     $ilDB->addPrimaryKey("xdbt_posting", ["id", "version"]);
+}
+?>
+<#5>
+<?php
+if ($ilDB->tableExists("rep_robj_xdbt_data") && !$ilDB->tableExists("xdbt_data")) {
+    $ilDB->renameTable("rep_robj_xdbt_data", "xdbt_data");
+}
+?>
+<#6>
+<?php
+if ($ilDB->tableColumnExists("xdbt_posting", "last_update")) {
+    $ilDB->dropTableColumn("xdbt_posting", "last_update");
+}
+?>
+<#7>
+<?php
+if($ilDB->tableExists("xdbt_posting") && !$ilDB->tableExists("xdbt_posting_seq")) {
+    $ilDB->createSequence("xdbt_posting");
 }
 ?>

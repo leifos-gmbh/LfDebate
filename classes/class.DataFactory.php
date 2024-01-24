@@ -19,11 +19,9 @@
 declare(strict_types=1);
 
 namespace Leifos\Debate;
-use Leifos\Debate\Posting\Posting;
 
 class DataFactory
 {
-
     public function __construct()
     {
     }
@@ -31,15 +29,23 @@ class DataFactory
     public function posting(
         int $obj_id,
         int $id,
-        int $version,
-        string $title
-    ) : Posting
+        int $user_id,
+        string $title,
+        string $description,
+        string $type,
+        string $create_date,
+        int $version = 0
+    ): Posting
     {
         return new Posting(
             $obj_id,
             $id,
-            $version,
-            $title
+            $user_id,
+            $title,
+            $description,
+            $type,
+            $create_date,
+            $version
         );
     }
 }

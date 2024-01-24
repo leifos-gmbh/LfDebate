@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
+declare(strict_types=1);
+
 include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
 
 /**
@@ -26,7 +44,7 @@ class ilObjLfDebate extends ilObjectPlugin
     {
         $ilDB = $this->db;
 
-        $ilDB->manipulate("INSERT INTO rep_robj_xdbt_data " .
+        $ilDB->manipulate("INSERT INTO xdbt_data " .
             "(obj_id, is_online) VALUES (" .
             $ilDB->quote($this->getId(), "integer") . "," .
             $ilDB->quote(0, "integer") .
@@ -37,7 +55,7 @@ class ilObjLfDebate extends ilObjectPlugin
     {
         $ilDB = $this->db;
 
-        $set = $ilDB->query("SELECT * FROM rep_robj_xdbt_data " .
+        $set = $ilDB->query("SELECT * FROM xdbt_data " .
             " WHERE obj_id = " . $ilDB->quote($this->getId(), "integer")
         );
         while ($rec = $ilDB->fetchAssoc($set)) {
@@ -49,7 +67,7 @@ class ilObjLfDebate extends ilObjectPlugin
     {
         $ilDB = $this->db;
 
-        $ilDB->manipulate("UPDATE rep_robj_xdbt_data SET " .
+        $ilDB->manipulate("UPDATE xdbt_data SET " .
             " is_online = " . $ilDB->quote($this->isOnline(), "integer") . " " .
             " WHERE obj_id = " . $ilDB->quote($this->getId(), "integer")
         );
@@ -59,7 +77,7 @@ class ilObjLfDebate extends ilObjectPlugin
     {
         $ilDB = $this->db;
 
-        $ilDB->manipulate("DELETE FROM rep_robj_xdbt_data WHERE " .
+        $ilDB->manipulate("DELETE FROM xdbt_data WHERE " .
             " obj_id = " . $ilDB->quote($this->getId(), "integer")
         );
     }

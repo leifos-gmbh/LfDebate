@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-namespace Leifos\Debate\Posting;
+namespace Leifos\Debate;
 
 use Leifos\Debate\DataFactory;
 
@@ -45,24 +45,197 @@ class PostingDBRepo
     /**
      * @return Posting[]
      */
-    public function getTopPostings(int $obj_id) : array
+    public function getTopEntries(int $obj_id): array
     {
         $set = $this->db->queryF("SELECT * FROM xdbt_posting p JOIN xdbt_post_tree t ON (t.child = p.id) " .
-            " WHERE t.xdbt_obj_id = %s AND p.version = %s AND t.parent = %s",
-            ["integer","integer","integer"],
-            [$obj_id,0,0]
+            " WHERE t.xdbt_obj_id = %s AND t.parent = %s ORDER BY p.id, p.version DESC",
+            ["integer", "integer"],
+            [$obj_id, 0]
         );
         $postings = [];
         while ($rec = $this->db->fetchAssoc($set)) {
             $postings[] = $this->data->posting(
                 (int) $rec["xdbt_obj_id"],
                 (int) $rec["id"],
+                (int) $rec["user_id"],
+                (string) $rec["title"],
+                (string) $rec["description"],
+                (string) $rec["type"],
+                (string) $rec["create_date"],
                 (int) $rec["version"],
-                (string) $rec["title"]
             );
         }
 
         return $postings;
     }
 
+    /**
+     * @return Posting[]
+     */
+    public function getSubEntries(int $obj_id, int $id): array
+    {
+        $set = $this->db->queryF("SELECT * FROM xdbt_posting p JOIN xdbt_post_tree t ON (t.child = p.id) " .
+            " WHERE t.xdbt_obj_id = %s AND t.parent = %s ORDER BY p.id, p.version DESC",
+            ["integer", "integer"],
+            [$obj_id, $id]
+        );
+        $postings = [];
+        while ($rec = $this->db->fetchAssoc($set)) {
+            $postings[] = $this->data->posting(
+                (int) $rec["xdbt_obj_id"],
+                (int) $rec["id"],
+                (int) $rec["user_id"],
+                (string) $rec["title"],
+                (string) $rec["description"],
+                (string) $rec["type"],
+                (string) $rec["create_date"],
+                (int) $rec["version"],
+            );
+        }
+
+        return $postings;
+    }
+
+    public function getPosting(int $obj_id, int $id, int $version): ?Posting
+    {
+        $set = $this->db->queryF("SELECT * FROM xdbt_posting " .
+            " WHERE id = %s AND version = %s",
+            ["integer", "integer"],
+            [$id, $version]
+        );
+        if ($rec = $this->db->fetchAssoc($set)) {
+            return $this->data->posting(
+                $obj_id,
+                (int) $rec["id"],
+                (int) $rec["user_id"],
+                (string) $rec["title"],
+                (string) $rec["description"],
+                (string) $rec["type"],
+                (string) $rec["create_date"],
+                (int) $rec["version"],
+            );
+        }
+
+        return null;
+    }
+
+    public function create(
+        int $user_id,
+        string $title,
+        string $description,
+        string $type,
+        string $date
+    ): int
+    {
+        $id = $this->db->nextId("xdbt_posting");
+        $this->db->insert("xdbt_posting", [
+            "id" => ["integer", $id],
+            "user_id" => ["integer", $user_id],
+            "title" => ["text", $title],
+            "description" => ["clob", $description],
+            "type" => ["text", $type],
+            "create_date" => ["date", $date],
+            "version" => ["integer", 0]
+        ]);
+
+        return (int) $id;
+    }
+
+    public function createNewVersion(
+        int $id,
+        int $user_id,
+        string $title,
+        string $description,
+        string $type,
+        string $date,
+        int $version
+    ): void {
+                                                            //provisorisch, solange es noch keine Versionierung gibt
+        $this->db->replace("xdbt_posting",
+            [
+                "id" => ["integer", $id],
+                "version" => ["integer", 0]
+            ],
+            [
+                "user_id" => ["integer", $user_id],
+                "title" => ["text", $title],
+                "description" => ["clob", $description],
+                "type" => ["text", $type],
+                "create_date" => ["date", $date],
+            ]
+        );
+
+        /*$this->db->insert("xdbt_posting", [
+            "id" => ["integer", $id],
+            "user_id" => ["integer", $user_id],
+            "title" => ["text", $title],
+            "description" => ["clob", $description],
+            "type" => ["text", $type],
+            "create_date" => ["date", $date],
+            "version" => ["integer", $version]
+        ]);*/
+    }
+
+    public function addToTree(
+        int $obj_id,
+        int $id,
+        int $parent_id = 0
+    ): void
+    {
+        $this->db->insert("xdbt_post_tree", [
+            "xdbt_obj_id" => ["integer", $obj_id],
+            "child" => ["text", $id],
+            "parent" => ["clob", $parent_id]
+        ]);
+    }
+
+    public function getCurrentType(int $id): string
+    {
+        $version = $this->getMaxVersion($id);
+        $set = $this->db->queryF("SELECT type FROM xdbt_posting " .
+            " WHERE id = %s AND version = %s",
+            ["integer", "integer"],
+            [$id, $version]
+        );
+
+        if ($rec = $this->db->fetchAssoc($set)) {
+            return $rec["type"];
+        }
+
+        return "";
+    }
+
+    public function getMaxVersion(int $id): int
+    {
+        $set = $this->db->queryF("SELECT MAX(version) as max_version FROM xdbt_posting " .
+            " WHERE id = %s",
+            ["integer"],
+            [$id]
+        );
+
+        if ($rec = $this->db->fetchAssoc($set)) {
+            return (int) $rec["max_version"];
+        }
+
+        return 0;
+    }
+
+    public function delete(int $id): void
+    {
+        $this->db->manipulateF(
+            "DELETE FROM xdbt_posting WHERE id = %s",
+            ["integer"],
+            [$id]
+        );
+    }
+
+    public function deleteAll(int $obj_id): void
+    {
+        $this->db->manipulateF(
+            "DELETE FROM xdbt_posting " .
+            " WHERE id IN (SELECT child FROM xdbt_post_tree WHERE xdbt_obj_id = %s)",
+            ["integer"],
+            [$obj_id]
+        );
+    }
 }
