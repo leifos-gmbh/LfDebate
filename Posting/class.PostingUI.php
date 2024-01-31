@@ -24,12 +24,8 @@ use ILIAS\UI\Component\Symbol\Avatar\Avatar;
 
 class PostingUI
 {
-    public const TYPE_PRO = "pro";
-    public const TYPE_CONTRA = "contra";
-    public const TYPE_QUESTION = "question";
-    public const TYPE_INITIAL = "initial";
     /**
-     * @var \ilPlugin
+     * @var \ilLfDebatePlugin
      */
     protected $plugin;
     /**
@@ -48,7 +44,6 @@ class PostingUI
      * @var Avatar
      */
     protected $avatar;
-
     /**
      * @var string
      */
@@ -57,22 +52,38 @@ class PostingUI
      * @var string
      */
     protected $title = "";
-
     /**
      * @var array
      */
     protected $actions = [];
+    /**
+     * @var string
+     */
+    protected $glyph = "";
+    /**
+     * @var \ILIAS\UI\Factory
+     */
+    protected $ui_fac;
+    /**
+     * @var \ILIAS\UI\Renderer
+     */
+    protected $ui_ren;
+    /**
+     * @var \ilTemplate
+     */
+    protected $main_tpl;
 
     public function __construct(
-        \ilPlugin $plugin,
+        \ilLfDebatePlugin $plugin,
         string $type,
         Avatar $avatar,
         string $name,
         string $date,
         string $title,
         string $text
-    )
-    {
+    ) {
+        global $DIC;
+
         $this->avatar = $avatar;
         $this->name = $name;
         $this->date = $date;
@@ -80,66 +91,55 @@ class PostingUI
         $this->text = $text;
         $this->type = $type;
         $this->plugin = $plugin;
+
+        $this->ui_fac = $DIC->ui()->factory();
+        $this->ui_ren = $DIC->ui()->renderer();
+        $this->main_tpl = $DIC->ui()->mainTemplate();
     }
 
-    public function withActions(array $actions):self
+    public function withActions(array $actions): self
     {
         $clone = clone($this);
         $clone->actions = $actions;
         return $clone;
     }
 
-    public function render() : string
+    public function render(): string
     {
-        global $DIC;
+        $this->main_tpl->addCss(
+            "./Customizing/global/plugins/Services/Repository/RepositoryObject/LfDebate/css/debate.css"
+        );
+        $tpl = $this->plugin->getTemplate("tpl.debate_item.html", true, true);
 
-        $r = $DIC->ui()->renderer();
-        $f = $DIC->ui()->factory();
+        $this->fillHTML($tpl);
+        $this->maybeSetActions($tpl);
 
-        $DIC->ui()->mainTemplate()->addCss(
-            "./Customizing/global/plugins/Services/Repository/RepositoryObject/LfDebate/css/debate.css");
+        return $tpl->get();
+    }
 
-        $tpl = $this->plugin->getTemplate(
-            "tpl.debate_item.html"
-            , true, true);
+    protected function fillHTML(\ilTemplate $tpl): void
+    {
+        $tpl->setVariable("NAME", $this->name);
+        $tpl->setVariable("DATE", $this->date);
+        $tpl->setVariable("TITLE", $this->glyph . $this->title);
+        $tpl->setVariable("TEXT", $this->text);
+        $tpl->setVariable("TYPE", $this->type);
+        $tpl->setVariable("AVATAR", $this->ui_ren->render($this->avatar));
+    }
 
-
-        $glyph = "";
-        switch (trim($this->type)) {
-            case "pro":
-                $glyph = "glyphicon-circle-arrow-up debate-glyph-pro";
-                break;
-            case "contra":
-                $glyph = "glyphicon-circle-arrow-down debate-glyph-contra";
-                break;
-            case "question":
-                $glyph = "glyphicon-question-sign debate-glyph-question";
-                break;
-        }
-        if ($glyph !== "") {
-            $glyph = '<span class="glyphicon '. $glyph .'" aria-hidden="true"></span> ';
-        }
-
+    protected function maybeSetActions(\ilTemplate $tpl): void
+    {
         if (count($this->actions) > 0) {
             $action_html = "";
             foreach ($this->actions as $c) {
                 if ($action_html !== "") {
-                    $action_html .= trim($r->render($f->divider()->vertical()));
+                    $action_html .= trim($this->ui_ren->render($this->ui_fac->divider()->vertical()));
                 }
-                $action_html .= trim($r->render($c));
+                $action_html .= trim($this->ui_ren->render($c));
             }
             $tpl->setCurrentBlock("actions");
             $tpl->setVariable("ACTIONS", $action_html);
             $tpl->parseCurrentBlock();
         }
-
-        $tpl->setVariable("NAME", $this->name);
-        $tpl->setVariable("DATE", $this->date);
-        $tpl->setVariable("TITLE", $glyph . $this->title);
-        $tpl->setVariable("TEXT", $this->text);
-        $tpl->setVariable("TYPE", $this->type);
-        $tpl->setVariable("AVATAR",$r->render($this->avatar));
-
-        return $tpl->get();
     }
 }

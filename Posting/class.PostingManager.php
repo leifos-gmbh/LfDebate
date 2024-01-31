@@ -72,9 +72,9 @@ class PostingManager
     /**
      * @return Posting[]
      */
-    public function getSubCommentsOfComment(int $id): array                   // notwendig? oder reicht getComments?
+    public function getSubCommentsOfComment(int $id): array
     {
-        return $this->repo->posting()->getSubEntries($this->obj_id, $id);
+        return $this->getCommentsOfTopPosting($id);
     }
 
     public function getPosting(int $id, ?int $version = null): Posting
@@ -91,7 +91,7 @@ class PostingManager
             $user_id,
             $title,
             $description,
-            PostingUI::TYPE_INITIAL,
+            CommentUI::TYPE_INITIAL,
             \ilUtil::now()
         );
 
@@ -102,29 +102,6 @@ class PostingManager
     }
 
     public function createCommentPosting(
-        int $parent_id,
-        string $title,
-        string $description,
-        string $type
-    ): void {
-        $user_id = $this->domain->user()->getId();
-        $posting_id = $this->repo->posting()->create(
-            $user_id,
-            $title,
-            $description,
-            $type,
-            \ilUtil::now()
-        );
-
-        $this->repo->posting()->addToTree(
-            $this->obj_id,
-            $posting_id,
-            $parent_id
-        );
-    }
-
-                                  // brauchen wir diese extra Methode für Sub Comments oder die für Comments benutzen?
-    public function createSubCommentPosting(
         int $parent_id,
         string $title,
         string $description,
@@ -163,7 +140,7 @@ class PostingManager
         );
     }
 
-    public function getCurrentTypeOfPosting(int $id): string
+    protected function getCurrentTypeOfPosting(int $id): string
     {
         return $this->repo->posting()->getCurrentType($id);
     }

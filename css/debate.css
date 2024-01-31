@@ -32,12 +32,20 @@
     border-color: #d3d3d3;
 }
 
-.il-item.debate-item.neutral {
+.debate-glyph-question {
+    color: #757575;
+}
+
+.il-item.debate-item.exclamation {
     border-color: #d3d3d3;
 }
 
-.debate-glyph-question {
+.debate-glyph-exclamation {
     color: #757575;
+}
+
+.il-item.debate-item.neutral {
+    border-color: #d3d3d3;
 }
 
 .debate-date {

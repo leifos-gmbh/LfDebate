@@ -66,6 +66,15 @@ class DomainFactory
         );
     }
 
+    public function accessWrapper(int $ref_id): DebateAccess
+    {
+        return new DebateAccess(
+            $this->rbac()->system(),
+            $ref_id,
+            $this->user()->getId(),
+        );
+    }
+
     //
     // common domain things
     //

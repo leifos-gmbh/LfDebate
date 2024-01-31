@@ -55,4 +55,14 @@ class GUIRequest
     {
         return (int) $this->http->request()->getQueryParams()["post_id"];
     }
+
+    public function getCommentId(): int
+    {
+        return (int) $this->http->request()->getQueryParams()["cmt_id"];
+    }
+
+    public function getPostingMode(): bool
+    {
+        return (bool) $this->http->request()->getQueryParams()["post_mode"];
+    }
 }

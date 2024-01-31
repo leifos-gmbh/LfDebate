@@ -55,7 +55,7 @@ class GUIFactory
     }
 
     public function posting(
-        \ilPlugin $plugin,
+        \ilLfDebatePlugin $plugin,
         string $type,
         Avatar $avatar,
         string $name,
@@ -64,6 +64,26 @@ class GUIFactory
         string $text
     ): PostingUI {
         return new PostingUI(
+            $plugin,
+            $type,
+            $avatar,
+            $name,
+            $date,
+            $title,
+            $text
+        );
+    }
+
+    public function comment(
+        \ilLfDebatePlugin $plugin,
+        string $type,
+        Avatar $avatar,
+        string $name,
+        string $date,
+        string $title,
+        string $text
+    ): CommentUI {
+        return new CommentUI(
             $plugin,
             $type,
             $avatar,
