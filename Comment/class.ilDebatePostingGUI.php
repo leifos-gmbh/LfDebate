@@ -18,10 +18,13 @@
 
 declare(strict_types=1);
 
+use Leifos\Debate\CommentLightUI;
 use Leifos\Debate\CommentUI;
 use Leifos\Debate\DebateAccess;
 use Leifos\Debate\GUIFactory;
 use Leifos\Debate\Posting;
+use Leifos\Debate\PostingLightUI;
+use Leifos\Debate\PostingUI;
 use Leifos\Debate\PostingManager;
 use ILIAS\UI;
 use ILIAS\UI\Component\Input\Container\Form\Form;
@@ -90,6 +93,10 @@ class ilDebatePostingGUI
      * @var Posting
      */
     protected $posting;
+    /**
+     * @var UI\Component\Component[]
+     */
+    protected $ui_comps = [];
 
     public function __construct(ilLfDebatePlugin $dbt_plugin, ilObjLfDebate $dbt_obj)
     {
@@ -140,7 +147,7 @@ class ilDebatePostingGUI
         $this->tpl->setLocator();
     }
 
-    protected function returnToDebate()
+    protected function returnToDebate(): void
     {
         $this->ctrl->redirectByClass("ilobjlfdebategui", "showAllPostings");
     }
@@ -154,16 +161,112 @@ class ilDebatePostingGUI
         );
 
         $html = "";
-        $avatar = ilObjUser::_getAvatar($this->posting->getUserId());
-        $posting_ui = $this->gui->posting(
-            $this->dbt_plugin,
-            $this->posting->getType(),
-            $avatar,
-            ilObjUser::_lookupFullname($this->posting->getUserId()),
-            $this->posting->getCreateDate(),
-            $this->posting->getTitle(),
-            $this->posting->getDescription()
+
+        $posting_ui = $this->getPostingUI();
+        $html .= $posting_ui->render();
+
+        $add_comment_button = $this->ui_fac->button()->standard(
+            "Kommentar hinzufügen",
+            $this->ctrl->getLinkTarget($this, "addComment")
         );
+        $html .= $this->ui_ren->render($add_comment_button);
+
+        foreach ($this->posting_manager->getLatestCommentsOfTopPosting($this->posting->getId()) as $comment) {
+            $comments_ui = $this->getCommentUI($comment);
+            $sub_html = "";
+            foreach ($this->posting_manager->getSubCommentsOfComment($comment->getId()) as $sub_comment) {
+                $sub_comments_ui = $this->getCommentUI($sub_comment, true);
+                $sub_html .= $sub_comments_ui->render();
+            }
+            $comments_ui = $comments_ui->withSubComments($sub_html);
+            $html .= $comments_ui->render();
+        }
+        // add modals
+        $html .= $this->ui_ren->render($this->ui_comps);
+
+        $this->tpl->setContent($html);
+    }
+
+    protected function getPostingUI(): PostingUI
+    {
+        $posting_ui = $this->getPostingBasics($this->posting);
+
+        $actions = $this->getPostingActions();
+        $posting_ui = $posting_ui->withActions($actions);
+
+        return $posting_ui;
+    }
+
+    protected function getCommentUI(Posting $comment, bool $sub = false): CommentUI
+    {
+        $comments_ui = $this->getPostingBasics($comment, true);
+
+        $actions = [];
+        $this->ctrl->setParameter($this, "cmt_id", $comment->getId());
+        if (!$sub && $this->access_wrapper->canAddComments()) {
+            $actions[] = $this->ui_fac->button()->shy(
+                "Kommentar hinzufügen",
+                $this->ctrl->getLinkTarget($this, "addComment")
+            );
+        }
+        $actions = $this->getCommentDefaultActions($actions, $comment);
+        $this->ctrl->clearParameterByClass(self::class, "cmt_id");
+        $comments_ui = $comments_ui->withActions($actions);
+
+        return $comments_ui;
+    }
+
+    /**
+     * @return PostingLightUI|CommentLightUI
+     */
+    protected function getModalPostingUI(Posting $posting, bool $comment = false)
+    {
+        $pos_type = $comment ? "commentLight" : "postingLight";
+        $posting_ui = $this->gui->$pos_type(
+            $this->dbt_plugin,
+            $posting->getType(),
+            $posting->getCreateDate(),
+            $posting->getTitle(),
+            $posting->getDescription()
+        );
+
+        return $posting_ui;
+    }
+
+    /**
+     * @return PostingUI|CommentUI
+     */
+    protected function getPostingBasics(Posting $posting, bool $comment = false)
+    {
+        $user = new ilObjUser($posting->getUserId());
+        $name = $user->getPublicName();
+        $avatar = $user->getAvatar();
+        $first_post = $this->posting_manager->getPosting($posting->getId(), 0);
+        $create_date = $first_post->getCreateDate();
+        $last_edit = "";
+        if ($posting->getVersion() !== 0) {
+            $last_edit = $posting->getCreateDate();
+        }
+        $pos_type = $comment ? "comment" : "posting";
+        $posting_ui = $this->gui->$pos_type(
+            $this->dbt_plugin,
+            $posting->getType(),
+            $avatar,
+            $name,
+            $create_date,
+            $last_edit,
+            $posting->getTitle(),
+            $posting->getDescription()
+        );
+
+        return $posting_ui;
+    }
+
+    /**
+     * @return UI\Component\Button\Shy[]
+     */
+    protected function getPostingActions(): array
+    {
         $actions = [];
         $this->ctrl->setParameterByClass("ilobjlfdebategui", "post_id", $this->posting->getId());
         $this->ctrl->setParameterByClass("ilobjlfdebategui", "post_mode", 1);
@@ -172,6 +275,19 @@ class ilDebatePostingGUI
                 "Bearbeiten",
                 $this->ctrl->getLinkTargetByClass("ilobjlfdebategui", "editPosting")
             );
+        }
+        if ($this->access_wrapper->canReadPostingHistory($this->posting)
+            && !empty($old_postings = $this->posting_manager->getOlderVersionsOfPosting($this->posting->getId()))
+        ) {
+            $modal_html = "";
+            foreach ($old_postings as $posting) {
+                $posting_ui = $this->getModalPostingUI($posting);
+                $modal_html .= $posting_ui->render();
+            }
+            $modal = $this->ui_fac->modal()->roundtrip("Ältere Versionen", $this->ui_fac->legacy($modal_html));
+            $this->ui_comps[] = $modal;
+            $actions[] = $this->ui_fac->button()->shy("Ältere Versionen anzeigen", "")
+                                      ->withOnClick($modal->getShowSignal());
         }
         if ($this->access_wrapper->canDeletePosting($this->posting) || $this->access_wrapper->canDeletePostings()) {
             $actions[] = $this->ui_fac->button()->shy(
@@ -182,87 +298,41 @@ class ilDebatePostingGUI
         $this->ctrl->clearParameterByClass("ilobjlfdebategui", "post_id");
         $this->ctrl->clearParameterByClass("ilobjlfdebategui", "post_mode");
 
-        $posting_ui = $posting_ui->withActions($actions);
-        $html .= $posting_ui->render();
+        return $actions;
+    }
 
-        $add_comment_button = $this->ui_fac->button()->standard(
-            "Kommentar hinzufügen",
-            $this->ctrl->getLinkTarget($this, "addComment")
-        );
-        $html .= $this->ui_ren->render($add_comment_button);
-
-        foreach ($this->posting_manager->getCommentsOfTopPosting($this->posting->getId()) as $comment) {
-            $avatar = ilObjUser::_getAvatar($comment->getUserId());
-            $comments_ui = $this->gui->comment(
-                $this->dbt_plugin,
-                $comment->getType(),
-                $avatar,
-                ilObjUser::_lookupFullname($comment->getUserId()),
-                $comment->getCreateDate(),
-                $comment->getTitle(),
-                $comment->getDescription()
+    /**
+     * @return UI\Component\Button\Shy[]
+     */
+    protected function getCommentDefaultActions(array $actions, Posting $comment): array
+    {
+        if ($this->access_wrapper->canEditPosting($comment)) {
+            $actions[] = $this->ui_fac->button()->shy(
+                "Bearbeiten",
+                $this->ctrl->getLinkTarget($this, "editComment")
             );
-
-            $actions = [];
-            $this->ctrl->setParameter($this, "cmt_id", $comment->getId());
-            if ($this->access_wrapper->canAddComments()) {
-                $actions[] = $this->ui_fac->button()->shy(
-                    "Kommentar hinzufügen",
-                    $this->ctrl->getLinkTarget($this, "addComment")
-                );
+        }
+        if ($this->access_wrapper->canReadPostingHistory($comment)
+            && !empty($old_postings = $this->posting_manager->getOlderVersionsOfPosting($comment->getId()))
+        ) {
+            $modal_html = "";
+            foreach ($old_postings as $posting) {
+                $posting_ui = $this->getModalPostingUI($posting, true);
+                $modal_html .= $posting_ui->render();
             }
-            if ($this->access_wrapper->canEditPosting($comment)) {
-                $actions[] = $this->ui_fac->button()->shy(
-                    "Bearbeiten",
-                    $this->ctrl->getLinkTarget($this, "editComment")
-                );
-            }
-            if ($this->access_wrapper->canDeletePosting($comment) || $this->access_wrapper->canDeletePostings()) {
-                $actions[] = $this->ui_fac->button()->shy(
-                    "Löschen",
-                    $this->ctrl->getLinkTarget($this, "confirmDeleteComment")
-                );
-            }
-            $this->ctrl->clearParameterByClass(self::class, "cmt_id");
-            $comments_ui = $comments_ui->withActions($actions);
-
-            $sub_html = "";
-            foreach ($this->posting_manager->getSubCommentsOfComment($comment->getId()) as $sub_comment) {
-                $sub_avatar = ilObjUser::_getAvatar($sub_comment->getUserId());
-                $sub_comments_ui = $this->gui->comment(
-                    $this->dbt_plugin,
-                    $sub_comment->getType(),
-                    $sub_avatar,
-                    ilObjUser::_lookupFullname($sub_comment->getUserId()),
-                    $sub_comment->getCreateDate(),
-                    $sub_comment->getTitle(),
-                    $sub_comment->getDescription()
-                );
-
-                $sub_actions = [];
-                $this->ctrl->setParameter($this, "cmt_id", $sub_comment->getId());
-                if ($this->access_wrapper->canEditPosting($sub_comment)) {
-                    $sub_actions[] = $this->ui_fac->button()->shy(
-                        "Bearbeiten",
-                        $this->ctrl->getLinkTarget($this, "editComment")
-                    );
-                }
-                if ($this->access_wrapper->canDeletePosting($sub_comment) || $this->access_wrapper->canDeletePostings()) {
-                    $sub_actions[] = $this->ui_fac->button()->shy(
-                        "Löschen",
-                        $this->ctrl->getLinkTarget($this, "confirmDeleteComment")
-                    );
-                }
-                $this->ctrl->clearParameterByClass(self::class, "cmt_id");
-                $sub_comments_ui = $sub_comments_ui->withActions($sub_actions);
-                $sub_html .= $sub_comments_ui->render();
-            }
-            $comments_ui = $comments_ui->withSubComments($sub_html);
-
-            $html .= $comments_ui->render();
+            $modal = $this->ui_fac->modal()->roundtrip("Ältere Versionen", $this->ui_fac->legacy($modal_html));
+            $this->ui_comps[] = $modal;
+            $actions[] = $this->ui_fac->button()->shy("Ältere Versionen anzeigen", "")
+                                      ->withOnClick($modal->getShowSignal());
+        }
+        if ($this->access_wrapper->canDeletePosting($comment) || $this->access_wrapper->canDeletePostings()) {
+            $actions[] = $this->ui_fac->button()->shy(
+                "Löschen",
+                $this->ctrl->getLinkTarget($this, "confirmDeleteComment")
+            );
         }
 
-        $this->tpl->setContent($html);
+        return $actions;
     }
 
     protected function addComment(): void
@@ -369,7 +439,7 @@ class ilDebatePostingGUI
                 if ($edit) {
                     $comment = $this->posting_manager->getPosting($comment_id);
                     $this->posting_manager->editPosting(
-                        $comment->getId(),
+                        $comment,
                         $props["title"],
                         $props["description"]
                     );

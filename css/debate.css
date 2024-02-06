@@ -8,11 +8,15 @@
     padding: 4px;
 }
 
-.il-item.debate-item.initial {
+.il-item.debate-item.neutral {
+    border-color: #d3d3d3;
+}
+
+.il-item.debate-comment.initial {
     border-color: #8faedc;
 }
 
-.il-item.debate-item.pro {
+.il-item.debate-comment.pro {
     border-color: #92dc8f;
 }
 
@@ -20,7 +24,7 @@
     color: #578356;
 }
 
-.il-item.debate-item.contra {
+.il-item.debate-comment.contra {
     border-color: #dc8f8f;
 }
 
@@ -28,7 +32,7 @@
     color: #865656;
 }
 
-.il-item.debate-item.question {
+.il-item.debate-comment.question {
     border-color: #d3d3d3;
 }
 
@@ -36,16 +40,12 @@
     color: #757575;
 }
 
-.il-item.debate-item.exclamation {
+.il-item.debate-comment.exclamation {
     border-color: #d3d3d3;
 }
 
 .debate-glyph-exclamation {
     color: #757575;
-}
-
-.il-item.debate-item.neutral {
-    border-color: #d3d3d3;
 }
 
 .debate-date {
@@ -55,6 +55,10 @@
 }
 
 .debate-item .il-item-title {
+    margin-top: 4px;
+}
+
+.debate-comment .il-item-title {
     margin-top: 4px;
 }
 
@@ -81,7 +85,7 @@ h3.debate-title {
 
 .il-item.debate-comment {
     background-color: transparent;
-    padding:0px;
+    padding: 0px;
 }
 
 .debate-reply {

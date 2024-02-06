@@ -31,15 +31,7 @@ class PostingUI
     /**
      * @var string
      */
-    protected $text;
-    /**
-     * @var string
-     */
-    protected $date;
-    /**
-     * @var string
-     */
-    protected $name;
+    protected $type = "";
     /**
      * @var Avatar
      */
@@ -47,11 +39,23 @@ class PostingUI
     /**
      * @var string
      */
-    protected $type = "";
+    protected $name = "";
+    /**
+     * @var string
+     */
+    protected $create_date = "";
+    /**
+     * @var string
+     */
+    protected $last_edit = "";
     /**
      * @var string
      */
     protected $title = "";
+    /**
+     * @var string
+     */
+    protected $text = "";
     /**
      * @var array
      */
@@ -60,6 +64,10 @@ class PostingUI
      * @var string
      */
     protected $glyph = "";
+    /**
+     * @var \ilLanguage
+     */
+    protected $lng;
     /**
      * @var \ILIAS\UI\Factory
      */
@@ -78,20 +86,23 @@ class PostingUI
         string $type,
         Avatar $avatar,
         string $name,
-        string $date,
+        string $create_date,
+        string $last_edit,
         string $title,
         string $text
     ) {
         global $DIC;
 
+        $this->plugin = $plugin;
+        $this->type = $type;
         $this->avatar = $avatar;
         $this->name = $name;
-        $this->date = $date;
+        $this->create_date = $create_date;
+        $this->last_edit = $last_edit;
         $this->title = $title;
         $this->text = $text;
-        $this->type = $type;
-        $this->plugin = $plugin;
 
+        $this->lng = $DIC->language();
         $this->ui_fac = $DIC->ui()->factory();
         $this->ui_ren = $DIC->ui()->renderer();
         $this->main_tpl = $DIC->ui()->mainTemplate();
@@ -119,12 +130,17 @@ class PostingUI
 
     protected function fillHTML(\ilTemplate $tpl): void
     {
-        $tpl->setVariable("NAME", $this->name);
-        $tpl->setVariable("DATE", $this->date);
-        $tpl->setVariable("TITLE", $this->glyph . $this->title);
-        $tpl->setVariable("TEXT", $this->text);
         $tpl->setVariable("TYPE", $this->type);
         $tpl->setVariable("AVATAR", $this->ui_ren->render($this->avatar));
+        $tpl->setVariable("NAME", $this->name);
+        $tpl->setVariable("DATE", $this->create_date);
+        if ($this->last_edit !== "") {
+            $tpl->setCurrentBlock("edit");
+            $tpl->setVariable("EDIT", $this->lng->txt("last_change") . " " . $this->last_edit);
+            $tpl->parseCurrentBlock();
+        }
+        $tpl->setVariable("TITLE", $this->glyph . $this->title);
+        $tpl->setVariable("TEXT", $this->text);
     }
 
     protected function maybeSetActions(\ilTemplate $tpl): void

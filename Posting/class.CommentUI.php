@@ -22,11 +22,11 @@ namespace Leifos\Debate;
 
 class CommentUI extends PostingUI
 {
+    public const TYPE_INITIAL = "initial";
     public const TYPE_PRO = "pro";
     public const TYPE_CONTRA = "contra";
     public const TYPE_QUESTION = "question";
     public const TYPE_EXCLAMATION = "exclamation";
-    public const TYPE_INITIAL = "initial";
     /**
      * @var string
      */

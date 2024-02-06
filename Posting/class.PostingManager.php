@@ -56,17 +56,37 @@ class PostingManager
     /**
      * @return Posting[]
      */
-    public function getTopPostings(): array
+    public function getLatestTopPostings(): array
     {
-        return $this->repo->posting()->getTopEntries($this->obj_id);
+        $all = $this->repo->posting()->getTopEntries($this->obj_id);
+        $latest = [];
+        $temp_id = 0;
+        foreach ($all as $posting) {
+            if ($temp_id !== $posting->getId()) {
+                $latest[] = $posting;
+            }
+            $temp_id = $posting->getId();
+        }
+
+        return $latest;
     }
 
     /**
      * @return Posting[]
      */
-    public function getCommentsOfTopPosting(int $id): array
+    public function getLatestCommentsOfTopPosting(int $id): array
     {
-        return $this->repo->posting()->getSubEntries($this->obj_id, $id);
+        $all = $this->repo->posting()->getSubEntries($this->obj_id, $id);
+        $latest = [];
+        $temp_id = 0;
+        foreach ($all as $comment) {
+            if ($temp_id !== $comment->getId()) {
+                $latest[] = $comment;
+            }
+            $temp_id = $comment->getId();
+        }
+
+        return $latest;
     }
 
     /**
@@ -74,15 +94,34 @@ class PostingManager
      */
     public function getSubCommentsOfComment(int $id): array
     {
-        return $this->getCommentsOfTopPosting($id);
+        return $this->getLatestCommentsOfTopPosting($id);
     }
 
     public function getPosting(int $id, ?int $version = null): Posting
     {
-        if (!$version) {
+        if ($version === null) {
             $version = $this->getCurrentVersionOfPosting($id);
         }
         return $this->repo->posting()->getPosting($this->obj_id, $id, $version);
+    }
+
+    /**
+     * Get all former versions of a Posting
+     *
+     * @return Posting[]
+     */
+    public function getOlderVersionsOfPosting(int $id): array
+    {
+        $version = $this->getCurrentVersionOfPosting($id);
+        if ($version === 0) {
+            return [];
+        }
+        $postings = [];
+        while ($version > 0) {
+            $postings[] = $this->getPosting($id, --$version);
+        }
+
+        return $postings;
     }
 
     public function createTopPosting(string $title, string $description): void {
@@ -124,25 +163,19 @@ class PostingManager
     }
 
     public function editPosting(
-        int $id,
+        Posting $posting,
         string $new_title,
         string $new_description
     ): void {
-        $user_id = $this->domain->user()->getId();
         $this->repo->posting()->createNewVersion(
-            $id,
-            $user_id,
+            $posting->getId(),
+            $posting->getUserId(),
             $new_title,
             $new_description,
-            $this->getCurrentTypeOfPosting($id),                           // soll der Typ editierbar sein?
+            $posting->getType(),
             \ilUtil::now(),
-            $this->getCurrentVersionOfPosting($id) + 1
+            $posting->getVersion() + 1
         );
-    }
-
-    protected function getCurrentTypeOfPosting(int $id): string
-    {
-        return $this->repo->posting()->getCurrentType($id);
     }
 
     protected function getCurrentVersionOfPosting(int $id): int

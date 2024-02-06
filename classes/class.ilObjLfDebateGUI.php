@@ -19,7 +19,10 @@
 declare(strict_types=1);
 
 use Leifos\Debate\DebateAccess;
+use Leifos\Debate\Posting;
+use Leifos\Debate\PostingLightUI;
 use Leifos\Debate\PostingManager;
+use Leifos\Debate\PostingUI;
 use Leifos\Debate\GUIFactory;
 use ILIAS\UI;
 use ILIAS\UI\Component\Input\Container\Form\Form;
@@ -60,6 +63,10 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
      * @var ServerRequestInterface
      */
     protected $request;
+    /**
+     * @var UI\Component\Component[]
+     */
+    protected $ui_comps = [];
 
     public function __construct($a_ref_id = 0, $a_id_type = self::REPOSITORY_NODE_ID, $a_parent_node_id = 0)
     {
@@ -232,48 +239,105 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
         $this->tabs->activateTab("content");
 
+        $html = "";
+        foreach ($this->posting_manager->getLatestTopPostings() as $top_posting) {
+            $posting_ui = $this->getPostingUI($top_posting);
+            $html .= $posting_ui->render();
+        }
+        // add modals
+        $html .= $this->ui_ren->render($this->ui_comps);
+
+        $this->tpl->setContent($html);
+    }
+
+    protected function getPostingUI(Posting $posting): PostingUI
+    {
         /** @var ilLfDebatePlugin $dbt_plugin */
         $dbt_plugin = $this->plugin;
-        $html = "";
-        foreach ($this->posting_manager->getTopPostings() as $top_posting) {
-            $avatar = ilObjUser::_getAvatar($top_posting->getUserId());
-            $posting_ui = $this->gui->posting(
-                $dbt_plugin,
-                $top_posting->getType(),
-                $avatar,
-                ilObjUser::_lookupFullname($top_posting->getUserId()),
-                $top_posting->getCreateDate(),
-                $top_posting->getTitle(),
-                $top_posting->getDescription()
-            );
-            $actions = [];
-            $this->ctrl->setParameterByClass("ildebatepostinggui", "post_id", $top_posting->getId());
+        $user = new ilObjUser($posting->getUserId());
+        $name = $user->getPublicName();
+        $avatar = $user->getAvatar();
+        $first_post = $this->posting_manager->getPosting($posting->getId(), 0);
+        $create_date = $first_post->getCreateDate();
+        $last_edit = "";
+        if ($posting->getVersion() !== 0) {
+            $last_edit = $posting->getCreateDate();
+        }
+        $posting_ui = $this->gui->posting(
+            $dbt_plugin,
+            $posting->getType(),
+            $avatar,
+            $name,
+            $create_date,
+            $last_edit,
+            $posting->getTitle(),
+            $posting->getDescription()
+        );
+
+        $actions = $this->getActions($posting);
+        $posting_ui = $posting_ui->withActions($actions);
+
+        return $posting_ui;
+    }
+
+    protected function getModalPostingUI(Posting $posting): PostingLightUI
+    {
+        /** @var ilLfDebatePlugin $dbt_plugin */
+        $dbt_plugin = $this->plugin;
+        $posting_ui = $this->gui->postingLight(
+            $dbt_plugin,
+            $posting->getType(),
+            $posting->getCreateDate(),
+            $posting->getTitle(),
+            $posting->getDescription()
+        );
+
+        return $posting_ui;
+    }
+
+    /**
+     * @return UI\Component\Button\Shy[]
+     */
+    protected function getActions(Posting $top_posting): array
+    {
+        $actions = [];
+        $this->ctrl->setParameterByClass("ildebatepostinggui", "post_id", $top_posting->getId());
+        if ($this->access_wrapper->canReadPostings()) {
             $actions[] = $this->ui_fac->button()->shy(
                 "Öffnen",
                 $this->ctrl->getLinkTargetByClass("ildebatepostinggui", "showPosting")
             );
-            $this->ctrl->clearParameterByClass("ildebatepostinggui", "post_id");
-            $this->ctrl->setParameter($this, "post_id", $top_posting->getId());
-            if ($this->access_wrapper->canEditPosting($top_posting)) {
-                $actions[] = $this->ui_fac->button()->shy(
-                    "Bearbeiten",
-                    $this->ctrl->getLinkTarget($this, "editPosting")
-                );
-            }
-            if ($this->access_wrapper->canDeletePosting($top_posting) || $this->access_wrapper->canDeletePostings()) {
-                $actions[] = $this->ui_fac->button()->shy(
-                    "Löschen",
-                    $this->ctrl->getLinkTarget($this, "confirmDeletePosting")
-                );
-            }
-            $this->ctrl->clearParameterByClass(self::class, "post_id");
-
-            $posting_ui = $posting_ui->withActions($actions);
-
-            $html .= $posting_ui->render();
         }
+        $this->ctrl->clearParameterByClass("ildebatepostinggui", "post_id");
+        $this->ctrl->setParameter($this, "post_id", $top_posting->getId());
+        if ($this->access_wrapper->canEditPosting($top_posting)) {
+            $actions[] = $this->ui_fac->button()->shy(
+                "Bearbeiten",
+                $this->ctrl->getLinkTarget($this, "editPosting")
+            );
+        }
+        if ($this->access_wrapper->canReadPostingHistory($top_posting)
+            && !empty($old_postings = $this->posting_manager->getOlderVersionsOfPosting($top_posting->getId()))
+        ) {
+            $modal_html = "";
+            foreach ($old_postings as $posting) {
+                $posting_ui = $this->getModalPostingUI($posting);
+                $modal_html .= $posting_ui->render();
+            }
+            $modal = $this->ui_fac->modal()->roundtrip("Ältere Versionen", $this->ui_fac->legacy($modal_html));
+            $this->ui_comps[] = $modal;
+            $actions[] = $this->ui_fac->button()->shy("Ältere Versionen anzeigen", "")
+                                      ->withOnClick($modal->getShowSignal());
+        }
+        if ($this->access_wrapper->canDeletePosting($top_posting) || $this->access_wrapper->canDeletePostings()) {
+            $actions[] = $this->ui_fac->button()->shy(
+                "Löschen",
+                $this->ctrl->getLinkTarget($this, "confirmDeletePosting")
+            );
+        }
+        $this->ctrl->clearParameterByClass(self::class, "post_id");
 
-        $this->tpl->setContent($html);
+        return $actions;
     }
 
     protected function addPosting(): void
@@ -389,7 +453,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
                 if ($edit) {
                     $posting = $this->posting_manager->getPosting($posting_id);
                     $this->posting_manager->editPosting(
-                        $posting->getId(),
+                        $posting,
                         $props["title"],
                         $props["description"]
                     );

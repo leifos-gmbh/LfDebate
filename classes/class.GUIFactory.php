@@ -59,7 +59,8 @@ class GUIFactory
         string $type,
         Avatar $avatar,
         string $name,
-        string $date,
+        string $create_date,
+        string $last_edit,
         string $title,
         string $text
     ): PostingUI {
@@ -68,7 +69,8 @@ class GUIFactory
             $type,
             $avatar,
             $name,
-            $date,
+            $create_date,
+            $last_edit,
             $title,
             $text
         );
@@ -79,7 +81,8 @@ class GUIFactory
         string $type,
         Avatar $avatar,
         string $name,
-        string $date,
+        string $create_date,
+        string $last_edit,
         string $title,
         string $text
     ): CommentUI {
@@ -88,7 +91,40 @@ class GUIFactory
             $type,
             $avatar,
             $name,
-            $date,
+            $create_date,
+            $last_edit,
+            $title,
+            $text
+        );
+    }
+
+    public function postingLight(
+        \ilLfDebatePlugin $plugin,
+        string $type,
+        string $create_date,
+        string $title,
+        string $text
+    ): PostingLightUI {
+        return new PostingLightUI(
+            $plugin,
+            $type,
+            $create_date,
+            $title,
+            $text
+        );
+    }
+
+    public function commentLight(
+        \ilLfDebatePlugin $plugin,
+        string $type,
+        string $create_date,
+        string $title,
+        string $text
+    ): CommentLightUI {
+        return new CommentLightUI(
+            $plugin,
+            $type,
+            $create_date,
             $title,
             $text
         );

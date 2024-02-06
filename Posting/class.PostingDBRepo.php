@@ -42,6 +42,20 @@ class PostingDBRepo
         $this->db = $db;
     }
 
+    protected function getFromRecord(array $rec, int $obj_id): Posting
+    {
+        return $this->data->posting(
+            $obj_id,
+            (int) $rec["id"],
+            (int) $rec["user_id"],
+            (string) $rec["title"],
+            (string) $rec["description"],
+            (string) $rec["type"],
+            (string) $rec["create_date"],
+            (int) $rec["version"],
+        );
+    }
+
     /**
      * @return Posting[]
      */
@@ -54,16 +68,7 @@ class PostingDBRepo
         );
         $postings = [];
         while ($rec = $this->db->fetchAssoc($set)) {
-            $postings[] = $this->data->posting(
-                (int) $rec["xdbt_obj_id"],
-                (int) $rec["id"],
-                (int) $rec["user_id"],
-                (string) $rec["title"],
-                (string) $rec["description"],
-                (string) $rec["type"],
-                (string) $rec["create_date"],
-                (int) $rec["version"],
-            );
+            $postings[] = $this->getFromRecord($rec, $obj_id);
         }
 
         return $postings;
@@ -81,16 +86,7 @@ class PostingDBRepo
         );
         $postings = [];
         while ($rec = $this->db->fetchAssoc($set)) {
-            $postings[] = $this->data->posting(
-                (int) $rec["xdbt_obj_id"],
-                (int) $rec["id"],
-                (int) $rec["user_id"],
-                (string) $rec["title"],
-                (string) $rec["description"],
-                (string) $rec["type"],
-                (string) $rec["create_date"],
-                (int) $rec["version"],
-            );
+            $postings[] = $this->getFromRecord($rec, $obj_id);
         }
 
         return $postings;
@@ -103,20 +99,12 @@ class PostingDBRepo
             ["integer", "integer"],
             [$id, $version]
         );
+
         if ($rec = $this->db->fetchAssoc($set)) {
-            return $this->data->posting(
-                $obj_id,
-                (int) $rec["id"],
-                (int) $rec["user_id"],
-                (string) $rec["title"],
-                (string) $rec["description"],
-                (string) $rec["type"],
-                (string) $rec["create_date"],
-                (int) $rec["version"],
-            );
+            return $this->getFromRecord($rec, $obj_id);
         }
 
-        return null;
+        throw new \ilPostingNotFoundException("Posting with ID $id not found.");
     }
 
     public function create(
@@ -150,22 +138,7 @@ class PostingDBRepo
         string $date,
         int $version
     ): void {
-                                                            //provisorisch, solange es noch keine Versionierung gibt
-        $this->db->replace("xdbt_posting",
-            [
-                "id" => ["integer", $id],
-                "version" => ["integer", 0]
-            ],
-            [
-                "user_id" => ["integer", $user_id],
-                "title" => ["text", $title],
-                "description" => ["clob", $description],
-                "type" => ["text", $type],
-                "create_date" => ["date", $date],
-            ]
-        );
-
-        /*$this->db->insert("xdbt_posting", [
+        $this->db->insert("xdbt_posting", [
             "id" => ["integer", $id],
             "user_id" => ["integer", $user_id],
             "title" => ["text", $title],
@@ -173,7 +146,7 @@ class PostingDBRepo
             "type" => ["text", $type],
             "create_date" => ["date", $date],
             "version" => ["integer", $version]
-        ]);*/
+        ]);
     }
 
     public function addToTree(
