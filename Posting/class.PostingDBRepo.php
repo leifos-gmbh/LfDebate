@@ -202,11 +202,41 @@ class PostingDBRepo
         );
     }
 
+    public function removeFromTree(int $id): void
+    {
+        $this->db->manipulateF(
+            "DELETE FROM xdbt_post_tree " .
+            " WHERE child = %s",
+            ["integer"],
+            [$id]
+        );
+    }
+
+    public function removeChildsFromTree(int $parent_id): void
+    {
+        $this->db->manipulateF(
+            "DELETE FROM xdbt_post_tree " .
+            " WHERE parent = %s",
+            ["integer"],
+            [$parent_id]
+        );
+    }
+
     public function deleteAll(int $obj_id): void
     {
         $this->db->manipulateF(
             "DELETE FROM xdbt_posting " .
             " WHERE id IN (SELECT child FROM xdbt_post_tree WHERE xdbt_obj_id = %s)",
+            ["integer"],
+            [$obj_id]
+        );
+    }
+
+    public function removeAllFromTree(int $obj_id): void
+    {
+        $this->db->manipulateF(
+            "DELETE FROM xdbt_post_tree " .
+            " WHERE xdbt_obj_id = %s",
             ["integer"],
             [$obj_id]
         );

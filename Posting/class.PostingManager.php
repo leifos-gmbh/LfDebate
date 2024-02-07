@@ -182,4 +182,34 @@ class PostingManager
     {
         return $this->repo->posting()->getMaxVersion($id);
     }
+
+    public function deleteTopPosting(int $id): void
+    {
+        foreach ($this->getLatestCommentsOfTopPosting($id) as $comment) {
+            foreach ($this->getSubCommentsOfComment($comment->getId()) as $sub_comment) {
+                $this->repo->posting()->delete($sub_comment->getId());
+            }
+            $this->repo->posting()->delete($comment->getId());
+            $this->repo->posting()->removeChildsFromTree($comment->getId());
+        }
+        $this->repo->posting()->delete($id);
+        $this->repo->posting()->removeChildsFromTree($id);
+        $this->repo->posting()->removeFromTree($id);
+    }
+
+    public function deleteComment(int $id): void
+    {
+        foreach ($this->getSubCommentsOfComment($id) as $sub_comment) {
+            $this->repo->posting()->delete($sub_comment->getId());
+        }
+        $this->repo->posting()->delete($id);
+        $this->repo->posting()->removeChildsFromTree($id);
+        $this->repo->posting()->removeFromTree($id);
+    }
+
+    public function deleteAll(): void
+    {
+        $this->repo->posting()->deleteAll($this->obj_id);
+        $this->repo->posting()->removeAllFromTree($this->obj_id);
+    }
 }

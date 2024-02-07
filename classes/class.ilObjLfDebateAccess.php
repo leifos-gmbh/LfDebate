@@ -23,7 +23,7 @@ include_once("./Services/Repository/classes/class.ilObjectPluginAccess.php");
 /**
  * @author Thomas Famula <famula@leifos.de>
  */
-class ilObjLfDebateAccess extends ilObjectPluginAccess //implements ilConditionHandling            -> wofür ist das?
+class ilObjLfDebateAccess extends ilObjectPluginAccess //implements ilConditionHandling            // -> wofür ist das?
 {
 
     /**

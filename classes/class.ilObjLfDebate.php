@@ -73,6 +73,16 @@ class ilObjLfDebate extends ilObjectPlugin
         );
     }
 
+    public function beforeDelete(): bool
+    {
+        /** @var \Leifos\Debate\PostingManager $posting_manager */
+        $posting_manager = $this->getPlugin()->domain()->posting($this->getId());
+
+        $posting_manager->deleteAll();
+
+        return parent::beforeDelete();
+    }
+
     public function doDelete(): void
     {
         $ilDB = $this->db;

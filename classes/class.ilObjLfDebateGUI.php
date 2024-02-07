@@ -176,7 +176,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
         $this->tabs->activateTab("properties");
 
-        //inputs
+        // inputs
         $title = $this->ui_fac->input()->field()->text($this->txt("title"))
                                                 ->withValue($object->getTitle())
                                                 ->withRequired(true);
@@ -188,7 +188,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $this->txt("online")
         )->withValue($object->isOnline());
 
-        //section
+        // section
         $section_properties = $this->ui_fac->input()->field()->section(
             ["title" => $title,
              "description" => $description,
@@ -329,11 +329,16 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $actions[] = $this->ui_fac->button()->shy("Ältere Versionen anzeigen", "")
                                       ->withOnClick($modal->getShowSignal());
         }
-        if ($this->access_wrapper->canDeletePosting($top_posting) || $this->access_wrapper->canDeletePostings()) {
-            $actions[] = $this->ui_fac->button()->shy(
-                "Löschen",
-                $this->ctrl->getLinkTarget($this, "confirmDeletePosting")
-            );
+        if ($this->access_wrapper->canDeletePostings()) {
+            $item = $this->ui_fac->modal()->interruptiveItem((string) $top_posting->getId(), $top_posting->getTitle());
+            $delete_modal = $this->ui_fac->modal()->interruptive(
+                "Löschen bestätigen",
+                "Möchten Sie den Beitrag wirklich löschen? Bitte beachten Sie, dass die Kommentare im Beitrag auch gelöscht werden.",
+                $this->ctrl->getFormAction($this, "deletePosting")
+            )->withAffectedItems([$item]);
+            $this->ui_comps[] = $delete_modal;
+            $actions[] = $this->ui_fac->button()->shy("Löschen", "")
+                                      ->withOnClick($delete_modal->getShowSignal());
         }
         $this->ctrl->clearParameterByClass(self::class, "post_id");
 
@@ -493,8 +498,15 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         }
     }
 
-    protected function confirmDeletePosting()
+    protected function deletePosting()
     {
-        $this->ctrl->redirect($this, "showAllPostings");   // zu implementieren
+        $posting_id = $this->gui->request()->getPostingId();
+        if (!$this->access_wrapper->canDeletePostings()) {
+            return;
+        }
+        $this->posting_manager->deleteTopPosting($posting_id);
+
+        $this->tpl->setOnScreenMessage("success", $this->lng->txt("Beitrag wurde gelöscht."), true);
+        $this->ctrl->redirect($this, "showAllPostings");
     }
 }

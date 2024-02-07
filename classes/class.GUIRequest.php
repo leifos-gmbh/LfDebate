@@ -25,7 +25,7 @@ use ILIAS\Refinery;
 
 class GUIRequest
 {
-    //use BaseGUIRequest;  //für ILIAS 9+
+    //use BaseGUIRequest;  // für ILIAS 9+
 
     /**
      * @var HTTPServices

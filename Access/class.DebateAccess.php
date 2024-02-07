@@ -111,16 +111,4 @@ class DebateAccess
 
         return $this->access->checkAccessOfUser($user_id, "write", $this->ref_id);
     }
-
-    public function canDeletePosting(Posting $posting, int $user_id = 0): bool       //wird nicht mehr benötigt, da nur Lehrpersonal löschen darf
-    {
-        if ($user_id === 0) {
-            $user_id = $this->user_id;
-        }
-        if ($user_id === $posting->getUserId()) {
-            return true;
-        }
-
-        return false;
-    }
 }

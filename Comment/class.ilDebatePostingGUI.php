@@ -289,11 +289,16 @@ class ilDebatePostingGUI
             $actions[] = $this->ui_fac->button()->shy("Ältere Versionen anzeigen", "")
                                       ->withOnClick($modal->getShowSignal());
         }
-        if ($this->access_wrapper->canDeletePosting($this->posting) || $this->access_wrapper->canDeletePostings()) {
-            $actions[] = $this->ui_fac->button()->shy(
-                "Löschen",
-                $this->ctrl->getLinkTargetByClass("ilobjlfdebategui", "confirmDeletePosting")
-            );
+        if ($this->access_wrapper->canDeletePostings()) {
+            $item = $this->ui_fac->modal()->interruptiveItem((string) $this->posting->getId(), $this->posting->getTitle());
+            $delete_modal = $this->ui_fac->modal()->interruptive(
+                "Löschen bestätigen",
+                "Möchten Sie den Beitrag wirklich löschen? Bitte beachten Sie, dass die Kommentare im Beitrag auch gelöscht werden.",
+                $this->ctrl->getFormActionByClass("ilobjlfdebategui", "deletePosting")
+            )->withAffectedItems([$item]);
+            $this->ui_comps[] = $delete_modal;
+            $actions[] = $this->ui_fac->button()->shy("Löschen", "")
+                                      ->withOnClick($delete_modal->getShowSignal());
         }
         $this->ctrl->clearParameterByClass("ilobjlfdebategui", "post_id");
         $this->ctrl->clearParameterByClass("ilobjlfdebategui", "post_mode");
@@ -325,11 +330,16 @@ class ilDebatePostingGUI
             $actions[] = $this->ui_fac->button()->shy("Ältere Versionen anzeigen", "")
                                       ->withOnClick($modal->getShowSignal());
         }
-        if ($this->access_wrapper->canDeletePosting($comment) || $this->access_wrapper->canDeletePostings()) {
-            $actions[] = $this->ui_fac->button()->shy(
-                "Löschen",
-                $this->ctrl->getLinkTarget($this, "confirmDeleteComment")
-            );
+        if ($this->access_wrapper->canDeletePostings()) {
+            $item = $this->ui_fac->modal()->interruptiveItem((string) $comment->getId(), $comment->getTitle());
+            $delete_modal = $this->ui_fac->modal()->interruptive(
+                "Löschen bestätigen",
+                "Möchten Sie den Kommentar wirklich löschen? Bitte beachten Sie, dass die Antworten zum Kommentar auch gelöscht werden.",
+                $this->ctrl->getFormAction($this, "deleteComment")
+            )->withAffectedItems([$item]);
+            $this->ui_comps[] = $delete_modal;
+            $actions[] = $this->ui_fac->button()->shy("Löschen", "")
+                                      ->withOnClick($delete_modal->getShowSignal());
         }
 
         return $actions;
@@ -467,8 +477,15 @@ class ilDebatePostingGUI
         $this->ctrl->redirect($this, "showPosting");
     }
 
-    protected function confirmDeleteComment()
+    protected function deleteComment()
     {
-        $this->ctrl->redirect($this, "showPosting");    // zu implementieren
+        $comment_id = $this->gui->request()->getCommentId();
+        if (!$this->access_wrapper->canDeletePostings()) {
+            return;
+        }
+        $this->posting_manager->deleteComment($comment_id);
+
+        $this->tpl->setOnScreenMessage("success", $this->lng->txt("Kommentar wurde gelöscht."), true);
+        $this->ctrl->redirect($this, "showPosting");
     }
 }
