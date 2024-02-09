@@ -156,7 +156,7 @@ class ilDebatePostingGUI
     {
         $this->tabs->clearTargets();
         $this->tabs->setBackTarget(
-            "Beitragsübersicht",
+            $this->dbt_plugin->txt("posting_overview"),
             $this->ctrl->getLinkTargetByClass("ilobjlfdebategui", "showAllPostings")
         );
 
@@ -166,7 +166,7 @@ class ilDebatePostingGUI
         $html .= $posting_ui->render();
 
         $add_comment_button = $this->ui_fac->button()->standard(
-            "Kommentar hinzufügen",
+            $this->dbt_plugin->txt("add_comment"),
             $this->ctrl->getLinkTarget($this, "addComment")
         );
         $html .= $this->ui_ren->render($add_comment_button);
@@ -205,7 +205,7 @@ class ilDebatePostingGUI
         $this->ctrl->setParameter($this, "cmt_id", $comment->getId());
         if (!$sub && $this->access_wrapper->canAddComments()) {
             $actions[] = $this->ui_fac->button()->shy(
-                "Kommentar hinzufügen",
+                $this->dbt_plugin->txt("add_comment"),
                 $this->ctrl->getLinkTarget($this, "addComment")
             );
         }
@@ -272,7 +272,7 @@ class ilDebatePostingGUI
         $this->ctrl->setParameterByClass("ilobjlfdebategui", "post_mode", 1);
         if ($this->access_wrapper->canEditPosting($this->posting)) {
             $actions[] = $this->ui_fac->button()->shy(
-                "Bearbeiten",
+                $this->lng->txt("edit"),
                 $this->ctrl->getLinkTargetByClass("ilobjlfdebategui", "editPosting")
             );
         }
@@ -284,20 +284,20 @@ class ilDebatePostingGUI
                 $posting_ui = $this->getModalPostingUI($posting);
                 $modal_html .= $posting_ui->render();
             }
-            $modal = $this->ui_fac->modal()->roundtrip("Ältere Versionen", $this->ui_fac->legacy($modal_html));
+            $modal = $this->ui_fac->modal()->roundtrip($this->dbt_plugin->txt("older_versions"), $this->ui_fac->legacy($modal_html));
             $this->ui_comps[] = $modal;
-            $actions[] = $this->ui_fac->button()->shy("Ältere Versionen anzeigen", "")
+            $actions[] = $this->ui_fac->button()->shy($this->dbt_plugin->txt("show_older_versions"), "")
                                       ->withOnClick($modal->getShowSignal());
         }
         if ($this->access_wrapper->canDeletePostings()) {
             $item = $this->ui_fac->modal()->interruptiveItem((string) $this->posting->getId(), $this->posting->getTitle());
             $delete_modal = $this->ui_fac->modal()->interruptive(
-                "Löschen bestätigen",
-                "Möchten Sie den Beitrag wirklich löschen? Bitte beachten Sie, dass die Kommentare im Beitrag auch gelöscht werden.",
+                $this->dbt_plugin->txt("confirm_deletion"),
+                $this->dbt_plugin->txt("confirm_deletion_posting"),
                 $this->ctrl->getFormActionByClass("ilobjlfdebategui", "deletePosting")
             )->withAffectedItems([$item]);
             $this->ui_comps[] = $delete_modal;
-            $actions[] = $this->ui_fac->button()->shy("Löschen", "")
+            $actions[] = $this->ui_fac->button()->shy($this->lng->txt("delete"), "")
                                       ->withOnClick($delete_modal->getShowSignal());
         }
         $this->ctrl->clearParameterByClass("ilobjlfdebategui", "post_id");
@@ -313,7 +313,7 @@ class ilDebatePostingGUI
     {
         if ($this->access_wrapper->canEditPosting($comment)) {
             $actions[] = $this->ui_fac->button()->shy(
-                "Bearbeiten",
+                $this->lng->txt("edit"),
                 $this->ctrl->getLinkTarget($this, "editComment")
             );
         }
@@ -325,20 +325,20 @@ class ilDebatePostingGUI
                 $posting_ui = $this->getModalPostingUI($posting, true);
                 $modal_html .= $posting_ui->render();
             }
-            $modal = $this->ui_fac->modal()->roundtrip("Ältere Versionen", $this->ui_fac->legacy($modal_html));
+            $modal = $this->ui_fac->modal()->roundtrip($this->dbt_plugin->txt("older_versions"), $this->ui_fac->legacy($modal_html));
             $this->ui_comps[] = $modal;
-            $actions[] = $this->ui_fac->button()->shy("Ältere Versionen anzeigen", "")
+            $actions[] = $this->ui_fac->button()->shy($this->dbt_plugin->txt("show_older_versions"), "")
                                       ->withOnClick($modal->getShowSignal());
         }
         if ($this->access_wrapper->canDeletePostings()) {
             $item = $this->ui_fac->modal()->interruptiveItem((string) $comment->getId(), $comment->getTitle());
             $delete_modal = $this->ui_fac->modal()->interruptive(
-                "Löschen bestätigen",
-                "Möchten Sie den Kommentar wirklich löschen? Bitte beachten Sie, dass die Antworten zum Kommentar auch gelöscht werden.",
+                $this->dbt_plugin->txt("confirm_deletion"),
+                $this->dbt_plugin->txt("confirm_deletion_comment"),
                 $this->ctrl->getFormAction($this, "deleteComment")
             )->withAffectedItems([$item]);
             $this->ui_comps[] = $delete_modal;
-            $actions[] = $this->ui_fac->button()->shy("Löschen", "")
+            $actions[] = $this->ui_fac->button()->shy($this->lng->txt("delete"), "")
                                       ->withOnClick($delete_modal->getShowSignal());
         }
 
@@ -394,18 +394,18 @@ class ilDebatePostingGUI
         }
 
         $type = $this->ui_fac->input()->field()->radio($this->lng->txt("type"))
-            ->withOption(CommentUI::TYPE_INITIAL, $this->lng->txt("Neutral"))
-            ->withOption(CommentUI::TYPE_PRO, $this->lng->txt("Zustimmung"))
-            ->withOption(CommentUI::TYPE_CONTRA, $this->lng->txt("Ablehnung"))
-            ->withOption(CommentUI::TYPE_QUESTION, $this->lng->txt("Rückfrage"))
-            ->withOption(CommentUI::TYPE_EXCLAMATION, $this->lng->txt("Bestärkung"));
+            ->withOption(CommentUI::TYPE_INITIAL, $this->dbt_plugin->txt("neutral"))
+            ->withOption(CommentUI::TYPE_PRO, $this->dbt_plugin->txt("pro"), $this->dbt_plugin->txt("pro_info"))
+            ->withOption(CommentUI::TYPE_EXCLAMATION, $this->dbt_plugin->txt("exclamation"), $this->dbt_plugin->txt("exclamation_info"))
+            ->withOption(CommentUI::TYPE_CONTRA, $this->dbt_plugin->txt("contra"), $this->dbt_plugin->txt("contra_info"))
+            ->withOption(CommentUI::TYPE_QUESTION, $this->dbt_plugin->txt("question"), $this->dbt_plugin->txt("question_info"));
         if ($edit) {
             $type = $type->withValue($comment->getType());
         } else {
             $type = $type->withValue(CommentUI::TYPE_INITIAL);
         }
 
-        $section_title = $edit ? $this->lng->txt("update_comment") : $this->lng->txt("add_comment");
+        $section_title = $edit ? $this->dbt_plugin->txt("update_comment") : $this->dbt_plugin->txt("add_comment");
         $section_inputs = ["title" => $title,
                            "description" => $description];
         if (!$edit) {
@@ -453,6 +453,7 @@ class ilDebatePostingGUI
                         $props["title"],
                         $props["description"]
                     );
+                    $this->tpl->setOnScreenMessage("success", $this->dbt_plugin->txt("comment_updated"), true);
                 } else {
                     $parent_id = $comment_id ?: $this->posting->getId();
                     $this->posting_manager->createCommentPosting(
@@ -461,9 +462,8 @@ class ilDebatePostingGUI
                         $props["description"],
                         $props["type"]
                     );
+                    $this->tpl->setOnScreenMessage("success", $this->dbt_plugin->txt("comment_created"), true);
                 }
-
-                $this->tpl->setOnScreenMessage("success", $this->lng->txt("msg_obj_modified"), true);
             } else {
                 $this->tpl->setContent($this->ui_ren->render($form));
                 $this->tabs->clearTargets();
@@ -485,7 +485,7 @@ class ilDebatePostingGUI
         }
         $this->posting_manager->deleteComment($comment_id);
 
-        $this->tpl->setOnScreenMessage("success", $this->lng->txt("Kommentar wurde gelöscht."), true);
+        $this->tpl->setOnScreenMessage("success", $this->dbt_plugin->txt("comment_deleted"), true);
         $this->ctrl->redirect($this, "showPosting");
     }
 }

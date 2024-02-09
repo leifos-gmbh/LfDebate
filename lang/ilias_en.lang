@@ -1,13 +1,39 @@
+add_comment#:#Add Comment
+add_posting#:#Add Posting
 cat_create_xdbt#:#Create Debate
+comment_created#:#Comment has been added
+comment_deleted#:#Comment has bee deleted
+comment_updated#:#Comment has been updated
+confirm_deletion#:#Confirm Deletion
+confirm_deletion_comment#:#Do you really want to delete the comment? Please note that the replies to the comment will also be deleted.
+confirm_deletion_posting#:#Do you really want to delete the posting? Please note that the comments in the posting will also be deleted.
+contra#:#Objection
+contra_info#:#Select this category if you disagree with the posting or comment.
 crs_create_xdbt#:#Create Debate
+exclamation#:#Exclamation
+exclamation_info#:#Select this category if you consider the post or comment to be particularly important or if you would like to reinforce it with further information.
 fold_create_xdbt#:#Create Debate
 grp_create_xdbt#:#Create Debate
-root_create_xdbt#:#Create Debate
+neutral#:#Neutral
 obj_xdbt#:#Debate
 obj_xdbt_duplicate#:#Copy
 obj_xdbt_select#:#Select Debate
 objs_xdbt#:#Debats
 objs_xdbt_duplicate#:#Copy Debats
+older_versions#:#Older Versions
+posting_created#:#Posting has been added
+posting_deleted#:#Posting has been deleted
+posting_overview#:#Postings
+posting_updated#:#Posting has been updated
+pro#:#Approval
+pro_info#:#Select this category if you want to approve the posting or comment.
+question#:#Query
+question_info#:#Select this category if you have a query about the post or comment.
+root_create_xdbt#:#Create Debate
+saved_successfully#:#Changes have been saved
+show_older_versions#:#Show Older Versions
+update_comment#:#Update Comment
+update_posting#:#Update Posting
 xdbt_add#:#Add Debate
 xdbt_copy#:#Copy Debate
 xdbt_delete#:#Delete Debate

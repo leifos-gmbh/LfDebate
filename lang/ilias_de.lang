@@ -1,13 +1,39 @@
+add_comment#:#Kommentar hinzufügen
+add_posting#:#Beitrag hinzufügen
 cat_create_xdbt#:#Erstelle Debatte
+comment_created#:#Kommentar wurde hinzugefügt
+comment_deleted#:#Kommentar wurde gelöscht
+comment_updated#:#Kommentar wurde aktualisiert
+confirm_deletion#:#Löschen bestätigen
+confirm_deletion_comment#:#Möchten Sie den Kommentar wirklich löschen? Bitte beachten Sie, dass die Antworten zum Kommentar auch gelöscht werden.
+confirm_deletion_posting#:#Möchten Sie den Beitrag wirklich löschen? Bitte beachten Sie, dass die Kommentare im Beitrag auch gelöscht werden.
+contra#:#Einspruch
+contra_info#:#Wählen Sie diese Kategorie, wenn Sie dem Beitrag oder Kommentar widersprechen.
 crs_create_xdbt#:#Erstelle Debatte
+exclamation#:#Bestärkung
+exclamation_info#:#Wählen Sie diese Kategorie, wenn Sie den Beitrag oder Kommentar für besonders wichtig erachten oder mit weiterführenden Informationen bestärken möchten.
 fold_create_xdbt#:#Erstelle Debatte
 grp_create_xdbt#:#Erstelle Debatte
-root_create_xdbt#:#Erstelle Debatte
+neutral#:#Neutral
 obj_xdbt#:#Debatte
 obj_xdbt_duplicate#:#Kopieren
 obj_xdbt_select#:#Wähle Debatte
 objs_xdbt#:#Debatten
 objs_xdbt_duplicate#:#Kopiere Debatten
+older_versions#:#Ältere Versionen
+posting_created#:#Beitrag wurde hinzugefügt
+posting_deleted#:#Beitrag wurde gelöscht
+posting_overview#:#Beitragsübersicht
+posting_updated#:#Beitrag wurde aktualisiert
+pro#:#Zustimmung
+pro_info#:#Wählen Sie diese Kategorie, wenn Sie dem Beitrag oder Kommentar zustimmen möchten.
+question#:#Rückfrage
+question_info#:#Wählen Sie diese Kategorie, wenn Sie eine Rückfrage zu dem Beitrag oder Kommentar haben.
+root_create_xdbt#:#Erstelle Debatte
+saved_successfully#:#Änderungen wurden gespeichert
+show_older_versions#:#Ältere Versionen anzeigen
+update_comment#:#Kommentar aktualisieren
+update_posting#:#Beitrag aktualisieren
 xdbt_add#:#Debatte hinzufügen
 xdbt_copy#:#Debatte kopieren
 xdbt_delete#:#Debatte löschen

@@ -153,7 +153,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
     {
         if ($this->access_wrapper->canReadPostings()) {
             $this->tabs->addTab(
-                "content", $this->txt("Beitragsübersicht"), $this->ctrl->getLinkTarget($this, "showAllPostings")
+                "content", $this->txt("posting_overview"), $this->ctrl->getLinkTarget($this, "showAllPostings")
             );
         }
 
@@ -161,7 +161,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
         if ($this->access_wrapper->canEditProperties()) {
             $this->tabs->addTab(
-                "properties", $this->txt("properties"), $this->ctrl->getLinkTarget($this, "editProperties")
+                "properties", $this->lng->txt("properties"), $this->ctrl->getLinkTarget($this, "editProperties")
             );
         }
 
@@ -177,15 +177,15 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->tabs->activateTab("properties");
 
         // inputs
-        $title = $this->ui_fac->input()->field()->text($this->txt("title"))
+        $title = $this->ui_fac->input()->field()->text($this->lng->txt("title"))
                                                 ->withValue($object->getTitle())
                                                 ->withRequired(true);
 
-        $description = $this->ui_fac->input()->field()->textarea($this->txt("description"))
+        $description = $this->ui_fac->input()->field()->textarea($this->lng->txt("description"))
                                                       ->withValue($object->getDescription());
 
         $online = $this->ui_fac->input()->field()->checkbox(
-            $this->txt("online")
+            $this->lng->txt("online")
         )->withValue($object->isOnline());
 
         // section
@@ -193,7 +193,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             ["title" => $title,
              "description" => $description,
              "online" => $online],
-            $this->plugin->txt("obj_xdbt")
+            $this->txt("obj_xdbt")
         );
 
         $form = $this->ui_fac->input()->container()->form()->standard(
@@ -216,7 +216,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
                 $object->setOnline((bool) $props["online"]);
                 $object->update();
 
-                $this->tpl->setOnScreenMessage("success", $this->txt("msg_object_modified"), true);
+                $this->tpl->setOnScreenMessage("success", $this->txt("saved_successfully"), true);
             } else {
                 $this->tpl->setContent($this->ui_ren->render($form));
                 return;
@@ -232,7 +232,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
     {
         if ($this->access_wrapper->canAddPostings()) {
             $add_post_button = ilLinkButton::getInstance();
-            $add_post_button->setCaption("Beitrag hinzufügen");
+            $add_post_button->setCaption($this->txt("add_posting"), false);
             $add_post_button->setUrl($this->ctrl->getLinkTarget($this, "addPosting"));
             $this->toolbar->addButtonInstance($add_post_button);
         }
@@ -304,7 +304,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->ctrl->setParameterByClass("ildebatepostinggui", "post_id", $top_posting->getId());
         if ($this->access_wrapper->canReadPostings()) {
             $actions[] = $this->ui_fac->button()->shy(
-                "Öffnen",
+                $this->lng->txt("open"),
                 $this->ctrl->getLinkTargetByClass("ildebatepostinggui", "showPosting")
             );
         }
@@ -312,7 +312,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->ctrl->setParameter($this, "post_id", $top_posting->getId());
         if ($this->access_wrapper->canEditPosting($top_posting)) {
             $actions[] = $this->ui_fac->button()->shy(
-                "Bearbeiten",
+                $this->lng->txt("edit"),
                 $this->ctrl->getLinkTarget($this, "editPosting")
             );
         }
@@ -324,20 +324,20 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
                 $posting_ui = $this->getModalPostingUI($posting);
                 $modal_html .= $posting_ui->render();
             }
-            $modal = $this->ui_fac->modal()->roundtrip("Ältere Versionen", $this->ui_fac->legacy($modal_html));
+            $modal = $this->ui_fac->modal()->roundtrip($this->txt("older_versions"), $this->ui_fac->legacy($modal_html));
             $this->ui_comps[] = $modal;
-            $actions[] = $this->ui_fac->button()->shy("Ältere Versionen anzeigen", "")
+            $actions[] = $this->ui_fac->button()->shy($this->txt("show_older_versions"), "")
                                       ->withOnClick($modal->getShowSignal());
         }
         if ($this->access_wrapper->canDeletePostings()) {
             $item = $this->ui_fac->modal()->interruptiveItem((string) $top_posting->getId(), $top_posting->getTitle());
             $delete_modal = $this->ui_fac->modal()->interruptive(
-                "Löschen bestätigen",
-                "Möchten Sie den Beitrag wirklich löschen? Bitte beachten Sie, dass die Kommentare im Beitrag auch gelöscht werden.",
+                $this->txt("confirm_deletion"),
+                $this->txt("confirm_deletion_posting"),
                 $this->ctrl->getFormAction($this, "deletePosting")
             )->withAffectedItems([$item]);
             $this->ui_comps[] = $delete_modal;
-            $actions[] = $this->ui_fac->button()->shy("Löschen", "")
+            $actions[] = $this->ui_fac->button()->shy($this->lng->txt("delete"), "")
                                       ->withOnClick($delete_modal->getShowSignal());
         }
         $this->ctrl->clearParameterByClass(self::class, "post_id");
@@ -405,7 +405,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $description = $description->withValue($posting->getDescription());
         }
 
-        $section_title = $edit ? $this->txt("update_posting") : $this->lng->txt("add_posting");
+        $section_title = $edit ? $this->txt("update_posting") : $this->txt("add_posting");
         $section = $this->ui_fac->input()->field()->section(
             ["title" => $title,
              "description" => $description],
@@ -462,14 +462,14 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
                         $props["title"],
                         $props["description"]
                     );
+                    $this->tpl->setOnScreenMessage("success", $this->txt("posting_updated"), true);
                 } else {
                     $this->posting_manager->createTopPosting(
                         $props["title"],
                         $props["description"]
                     );
+                    $this->tpl->setOnScreenMessage("success", $this->txt("posting_created"), true);
                 }
-
-                $this->tpl->setOnScreenMessage("success", $this->lng->txt("msg_obj_modified"), true);
             } else {
                 $this->tpl->setContent($this->ui_ren->render($form));
                 $this->tabs->clearTargets();
@@ -506,7 +506,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         }
         $this->posting_manager->deleteTopPosting($posting_id);
 
-        $this->tpl->setOnScreenMessage("success", $this->lng->txt("Beitrag wurde gelöscht."), true);
+        $this->tpl->setOnScreenMessage("success", $this->txt("posting_deleted"), true);
         $this->ctrl->redirect($this, "showAllPostings");
     }
 }
