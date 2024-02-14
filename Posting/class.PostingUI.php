@@ -117,9 +117,6 @@ class PostingUI
 
     public function render(): string
     {
-        $this->main_tpl->addCss(
-            "./Customizing/global/plugins/Services/Repository/RepositoryObject/LfDebate/css/debate.css"
-        );
         $tpl = $this->plugin->getTemplate("tpl.debate_item.html", true, true);
 
         $this->fillHTML($tpl);
@@ -140,7 +137,7 @@ class PostingUI
             $tpl->parseCurrentBlock();
         }
         $tpl->setVariable("TITLE", $this->glyph . $this->title);
-        $tpl->setVariable("TEXT", $this->text);
+        $tpl->setVariable("TEXT", nl2br($this->text));
     }
 
     protected function maybeSetActions(\ilTemplate $tpl): void

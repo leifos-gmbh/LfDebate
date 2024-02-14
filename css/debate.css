@@ -41,11 +41,11 @@
 }
 
 .il-item.debate-comment.exclamation {
-    border-color: #d3d3d3;
+    border-color: #92dc8f;
 }
 
 .debate-glyph-exclamation {
-    color: #757575;
+    color: #578356;
 }
 
 .debate-date {
@@ -77,15 +77,15 @@ h3.debate-title {
     margin: 0 14px 15px 30px;
 }
 
-.debate-comment-outer {
-    padding: 4px;
+.il-item.debate-comment {
+    border: 3px solid;
     border-radius: 26px;
-    background-color: #f6f6f6;
+    padding: 4px;
 }
 
-.il-item.debate-comment {
-    background-color: transparent;
-    padding: 0px;
+.debate-comment-outer {
+    margin-top:5px;
+    margin-bottom:5px;
 }
 
 .debate-reply {
@@ -110,6 +110,28 @@ h3.debate-title {
     margin-top: 0px;
     margin-right: 17px;
     margin-bottom: 10px;
+}
+
+.il-item.debate-comment .il-item.debate-comment {
+    border: 0;
+    background-color: #f7f7f7;
+    padding: 4px;
+}
+
+.modal .il-item.debate-comment {
+    border: 0;
+    background-color: #f7f7f7;
+    padding: 4px;
+}
+
+.modal .debate-date {
+    padding-left:10px;
+    padding-top:6px;
+}
+
+
+.il-standard-form.form-horizontal textarea {
+    height: 13em;
 }
 
 @media only screen and (max-width: 768px) {

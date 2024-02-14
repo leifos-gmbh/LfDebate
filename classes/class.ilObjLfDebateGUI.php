@@ -40,6 +40,10 @@ require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/
 class ilObjLfDebateGUI extends ilObjectPluginGUI
 {
     /**
+     * @var ilTemplate
+     */
+    protected $main_tpl;
+    /**
      * @var PostingManager
      */
     protected $posting_manager;
@@ -77,6 +81,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->ui_fac = $DIC->ui()->factory();
         $this->ui_ren = $DIC->ui()->renderer();
         $this->request = $DIC->http()->request();
+        $this->main_tpl = $DIC->ui()->mainTemplate();
 
         /** @var ilLfDebatePlugin $plugin */
         $plugin = $this->plugin;
@@ -101,6 +106,13 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
     public function executeCommand(): void
     {
         $next_class = $this->ctrl->getNextClass($this);
+        $this->main_tpl->addCss(
+            "./Customizing/global/plugins/Services/Repository/RepositoryObject/LfDebate/css/debate.css"
+        );
+        ilLinkifyUtil::initLinkify($this->main_tpl);
+        $this->main_tpl->addOnloadCode(
+            "il.ExtLink.autolink('.debate-item, .debate-comment','');"
+        );
         switch ($next_class) {
             case "ildebatepostinggui":
                 $dbt_pos = new ilDebatePostingGUI($this->plugin, $this->object);
