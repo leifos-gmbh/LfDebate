@@ -62,9 +62,9 @@ class PostingDBRepo
     public function getTopEntries(int $obj_id): array
     {
         $set = $this->db->queryF("SELECT * FROM xdbt_posting p JOIN xdbt_post_tree t ON (t.child = p.id) " .
-            " WHERE t.xdbt_obj_id = %s AND t.parent = %s ORDER BY p.id, p.version DESC",
-            ["integer", "integer"],
-            [$obj_id, 0]
+            " WHERE t.xdbt_obj_id = %s AND t.parent = %s AND p.version = %s ORDER BY p.id, p.version DESC",
+            ["integer", "integer", "integer"],
+            [$obj_id, 0, 0]
         );
         $postings = [];
         while ($rec = $this->db->fetchAssoc($set)) {
@@ -80,9 +80,9 @@ class PostingDBRepo
     public function getSubEntries(int $obj_id, int $id): array
     {
         $set = $this->db->queryF("SELECT * FROM xdbt_posting p JOIN xdbt_post_tree t ON (t.child = p.id) " .
-            " WHERE t.xdbt_obj_id = %s AND t.parent = %s ORDER BY p.id, p.version DESC",
-            ["integer", "integer"],
-            [$obj_id, $id]
+            " WHERE t.xdbt_obj_id = %s AND t.parent = %s AND p.version = %s ORDER BY p.id, p.version DESC",
+            ["integer", "integer", "integer"],
+            [$obj_id, $id, 0]
         );
         $postings = [];
         while ($rec = $this->db->fetchAssoc($set)) {
@@ -135,9 +135,17 @@ class PostingDBRepo
         string $title,
         string $description,
         string $type,
-        string $date,
-        int $version
+        string $date
     ): void {
+        $max_version = $this->getMaxVersion($id);
+        $this->db->update("xdbt_posting", [
+            "version" => ["integer", $max_version + 1]
+        ], [    // where
+                "id" => ["integer", $id],
+                "version" => ["integer", 0],
+            ]
+        );
+
         $this->db->insert("xdbt_posting", [
             "id" => ["integer", $id],
             "user_id" => ["integer", $user_id],
@@ -145,7 +153,7 @@ class PostingDBRepo
             "description" => ["clob", $description],
             "type" => ["text", $type],
             "create_date" => ["date", $date],
-            "version" => ["integer", $version]
+            "version" => ["integer", 0]
         ]);
     }
 
@@ -191,6 +199,37 @@ class PostingDBRepo
         }
 
         return 0;
+    }
+
+    public function getInitialCreation(int $id)
+    {
+        $set = $this->db->queryF("SELECT MIN(create_date) as cd FROM xdbt_posting " .
+            " WHERE id = %s",
+            ["integer"],
+            [$id]
+        );
+        $rec = $this->db->fetchAssoc($set);
+        return $rec["cd"] ?? "";
+    }
+
+    public function getNrOfComments(int $id) : int
+    {
+        $set = $this->db->queryF("SELECT child FROM xdbt_post_tree " .
+            " WHERE parent = %s",
+            ["integer"],
+            [$id]
+        );
+        $childs = [];
+        while ($rec = $this->db->fetchAssoc($set)) {
+            $childs[$rec["child"]] = $rec["child"];
+        }
+        $set2 = $this->db->queryF("SELECT count(*) as cnt FROM xdbt_post_tree " .
+            " WHERE parent = " . $this->db->in("parent", $childs, false, "integer"),
+            [],
+            []
+        );
+        $rec2 = $this->db->fetchAssoc($set2);
+        return count($childs) + (int) ($rec2["cnt"] ?? 0);
     }
 
     public function delete(int $id): void

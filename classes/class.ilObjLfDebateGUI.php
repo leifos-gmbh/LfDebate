@@ -40,6 +40,10 @@ require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/
 class ilObjLfDebateGUI extends ilObjectPluginGUI
 {
     /**
+     * @var \Leifos\Debate\DomainFactory
+     */
+    protected $domain;
+    /**
      * @var ilTemplate
      */
     protected $main_tpl;
@@ -86,6 +90,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         /** @var ilLfDebatePlugin $plugin */
         $plugin = $this->plugin;
         $this->gui = $plugin->gui();
+        $this->domain = $plugin->domain();
 
         if ($this->object) {
             $this->posting_manager = $plugin->domain()->posting($this->object->getId());
@@ -200,11 +205,17 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $this->lng->txt("online")
         )->withValue($object->isOnline());
 
+        $default_sorting = $this->ui_fac->input()->field()->select(
+            $this->txt("default_sortation"),
+            $this->domain->sorting($object)->getAllOptions()
+        )->withValue($object->getDefaultSortation())->withRequired(true);
+
         // section
         $section_properties = $this->ui_fac->input()->field()->section(
             ["title" => $title,
              "description" => $description,
-             "online" => $online],
+             "online" => $online,
+             "default_sorting" => $default_sorting],
             $this->txt("obj_xdbt")
         );
 
@@ -249,10 +260,17 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $this->toolbar->addButtonInstance($add_post_button);
         }
 
+        $sorting = $this->domain->sorting($this->object);
+        $sort = $this->ui_fac->viewControl()->sortation(
+            $sorting->getAllOptions()
+        )->withTargetURL($this->ctrl->getLinkTargetByClass(self::class, "sort") , 'sortation')
+         ->withLabel($sorting->getSortLabel($sorting->getCurrentSorting()));
+        $this->toolbar->addComponent($sort);
+
         $this->tabs->activateTab("content");
 
         $html = "";
-        foreach ($this->posting_manager->getLatestTopPostings() as $top_posting) {
+        foreach ($this->posting_manager->getTopPostings($sorting->getCurrentSorting()) as $top_posting) {
             $posting_ui = $this->getPostingUI($top_posting);
             $html .= $posting_ui->render();
         }
@@ -269,10 +287,9 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $user = new ilObjUser($posting->getUserId());
         $name = $user->getPublicName();
         $avatar = $user->getAvatar();
-        $first_post = $this->posting_manager->getPosting($posting->getId(), 0);
-        $create_date = $first_post->getCreateDate();
+        $initial_create = $this->posting_manager->getInitialCreation($posting->getId());
         $last_edit = "";
-        if ($posting->getVersion() !== 0) {
+        if ($initial_create !== $posting->getCreateDate()) {
             $last_edit = $posting->getCreateDate();
         }
         $posting_ui = $this->gui->posting(
@@ -280,10 +297,11 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $posting->getType(),
             $avatar,
             $name,
-            $create_date,
+            $initial_create,
             $last_edit,
             $posting->getTitle(),
-            $posting->getDescription()
+            $posting->getDescription(),
+            $this->getTitleLink($posting)
         );
 
         $actions = $this->getActions($posting);
@@ -355,6 +373,15 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->ctrl->clearParameterByClass(self::class, "post_id");
 
         return $actions;
+    }
+
+    public function getTitleLink(Posting $top_posting) : string
+    {
+        $this->ctrl->setParameterByClass("ildebatepostinggui", "post_id", $top_posting->getId());
+        if ($this->access_wrapper->canReadPostings()) {
+            return $this->ctrl->getLinkTargetByClass("ildebatepostinggui", "showPosting");
+        }
+        return "";
     }
 
     protected function addPosting(): void
@@ -519,6 +546,12 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->posting_manager->deleteTopPosting($posting_id);
 
         $this->tpl->setOnScreenMessage("success", $this->txt("posting_deleted"), true);
+        $this->ctrl->redirect($this, "showAllPostings");
+    }
+
+    protected function sort() : void {
+        $sorting = $this->domain->sorting($this->object);
+        $sorting->setCurrentSorting($this->gui->request()->getSorting());
         $this->ctrl->redirect($this, "showAllPostings");
     }
 }

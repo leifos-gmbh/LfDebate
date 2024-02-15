@@ -114,3 +114,23 @@ if($ilDB->tableExists("xdbt_posting") && !$ilDB->tableExists("xdbt_posting_seq")
     $ilDB->createSequence("xdbt_posting");
 }
 ?>
+<#8>
+<?php
+if (!$ilDB->tableColumnExists("xdbt_data", "default_sortation")) {
+    $ilDB->addTableColumn("xdbt_data", "default_sortation", [
+        "type" => "integer",
+        "length" => 1,
+        "notnull" => true,
+        "default" => 1
+    ]);
+}
+?>
+<#9>
+<?php
+$ilDB->manipulateF("DELETE FROM xdbt_posting WHERE " .
+    " version > %s",
+    ["integer"],
+    [0]
+);
+
+?>

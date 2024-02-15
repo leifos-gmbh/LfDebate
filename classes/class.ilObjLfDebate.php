@@ -26,6 +26,10 @@ include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
 class ilObjLfDebate extends ilObjectPlugin
 {
     /**
+     * @var int
+     */
+    protected $default_sortation;
+    /**
      * @var bool
      */
     protected $online = false;
@@ -45,9 +49,10 @@ class ilObjLfDebate extends ilObjectPlugin
         $ilDB = $this->db;
 
         $ilDB->manipulate("INSERT INTO xdbt_data " .
-            "(obj_id, is_online) VALUES (" .
+            "(obj_id, is_online, default_sortation) VALUES (" .
             $ilDB->quote($this->getId(), "integer") . "," .
-            $ilDB->quote(0, "integer") .
+            $ilDB->quote(0, "integer") . "," .
+            $ilDB->quote(1, "integer") .
             ")");
     }
 
@@ -60,6 +65,7 @@ class ilObjLfDebate extends ilObjectPlugin
         );
         while ($rec = $ilDB->fetchAssoc($set)) {
             $this->setOnline((bool) $rec["is_online"]);
+            $this->setDefaultSortation((int) $rec["default_sortation"]);
         }
     }
 
@@ -68,7 +74,8 @@ class ilObjLfDebate extends ilObjectPlugin
         $ilDB = $this->db;
 
         $ilDB->manipulate("UPDATE xdbt_data SET " .
-            " is_online = " . $ilDB->quote($this->isOnline(), "integer") . " " .
+            " is_online = " . $ilDB->quote($this->isOnline(), "integer") . ", " .
+            " default_sortation = " . $ilDB->quote($this->getDefaultSortation(), "integer") . " " .
             " WHERE obj_id = " . $ilDB->quote($this->getId(), "integer")
         );
     }
@@ -95,6 +102,7 @@ class ilObjLfDebate extends ilObjectPlugin
     public function doCloneObject($new_obj, $a_target_id, $a_copy_id = null): void
     {
         $new_obj->setOnline($this->isOnline());
+        $new_obj->setDefaultSortation($this->getDefaultSortation());
         $new_obj->update();
     }
 
@@ -107,4 +115,15 @@ class ilObjLfDebate extends ilObjectPlugin
     {
         return $this->online;
     }
+
+    public function setDefaultSortation(int $a_val) : void
+    {
+        $this->default_sortation = $a_val;
+    }
+
+    public function getDefaultSortation() : int
+    {
+        return $this->default_sortation;
+    }
+
 }

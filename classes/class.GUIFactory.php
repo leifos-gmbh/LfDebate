@@ -62,7 +62,8 @@ class GUIFactory
         string $create_date,
         string $last_edit,
         string $title,
-        string $text
+        string $text,
+        string $title_link = ""
     ): PostingUI {
         return new PostingUI(
             $plugin,
@@ -72,7 +73,8 @@ class GUIFactory
             $create_date,
             $last_edit,
             $title,
-            $text
+            $text,
+            $title_link
         );
     }
 

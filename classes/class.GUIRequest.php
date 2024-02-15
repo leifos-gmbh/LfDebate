@@ -65,4 +65,10 @@ class GUIRequest
     {
         return (bool) $this->http->request()->getQueryParams()["post_mode"];
     }
+
+    public function getSorting(): int
+    {
+        return (int) $this->http->request()->getQueryParams()["sortation"];
+    }
+
 }

@@ -90,12 +90,11 @@ h3.debate-title {
 
 .debate-reply {
     text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .debate-reply .btn-default {
-    border-radius: 15px;
-    font-size: 0.8rem;
+    font-size: 1.2rem;
     padding: 4px 10px;
 }
 
@@ -135,15 +134,17 @@ h3.debate-title {
 }
 
 @media only screen and (max-width: 768px) {
-    .debate-item .il-avatar {
+    .debate-item .il-avatar, .debate-comment .il-avatar {
         height: 45px;
         width: 45px;
         border-width: 2px;
     }
+    .debate-comment .il-avatar.il-avatar-letter span.abbreviation,
     .debate-item .il-avatar.il-avatar-letter span.abbreviation {
         font-size: calc(41px / 2);
         top: calc(41px / 4);
     }
+    .debate-comment .il-avatar.il-avatar-picture img,
     .debate-item .il-avatar.il-avatar-picture img {
         height: 45px;
         width: 45px;

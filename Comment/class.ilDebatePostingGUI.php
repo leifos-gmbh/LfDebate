@@ -169,9 +169,9 @@ class ilDebatePostingGUI
             $this->dbt_plugin->txt("add_comment"),
             $this->ctrl->getLinkTarget($this, "addComment")
         );
-        $html .= $this->ui_ren->render($add_comment_button);
+        $html .= "<div class='debate-reply'>" . $this->ui_ren->render($add_comment_button) ."</div>";
 
-        foreach ($this->posting_manager->getLatestCommentsOfTopPosting($this->posting->getId()) as $comment) {
+        foreach ($this->posting_manager->getCommentsOfPosting($this->posting->getId()) as $comment) {
             $comments_ui = $this->getCommentUI($comment);
             $sub_html = "";
             foreach ($this->posting_manager->getSubCommentsOfComment($comment->getId()) as $sub_comment) {
@@ -241,10 +241,9 @@ class ilDebatePostingGUI
         $user = new ilObjUser($posting->getUserId());
         $name = $user->getPublicName();
         $avatar = $user->getAvatar();
-        $first_post = $this->posting_manager->getPosting($posting->getId(), 0);
-        $create_date = $first_post->getCreateDate();
+        $initial_creation = $this->posting_manager->getInitialCreation($posting->getId());
         $last_edit = "";
-        if ($posting->getVersion() !== 0) {
+        if ($initial_creation !== $posting->getCreateDate()) {
             $last_edit = $posting->getCreateDate();
         }
         $pos_type = $comment ? "comment" : "posting";
@@ -253,7 +252,7 @@ class ilDebatePostingGUI
             $posting->getType(),
             $avatar,
             $name,
-            $create_date,
+            $initial_creation,
             $last_edit,
             $posting->getTitle(),
             $posting->getDescription()

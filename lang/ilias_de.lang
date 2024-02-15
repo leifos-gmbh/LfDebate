@@ -10,6 +10,7 @@ confirm_deletion_posting#:#Möchten Sie den Beitrag wirklich löschen? Bitte bea
 contra#:#Einspruch
 contra_info#:#Wählen Sie diese Kategorie, wenn Sie dem Beitrag oder Kommentar widersprechen.
 crs_create_xdbt#:#Erstelle Debatte
+default_sortation#:#Standardsortierung
 exclamation#:#Bestärkung
 exclamation_info#:#Wählen Sie diese Kategorie, wenn Sie den Beitrag oder Kommentar für besonders wichtig erachten oder mit weiterführenden Informationen bestärken möchten.
 fold_create_xdbt#:#Erstelle Debatte
@@ -33,6 +34,14 @@ question_info#:#Wählen Sie diese Kategorie, wenn Sie eine Rückfrage zu dem Bei
 root_create_xdbt#:#Erstelle Debatte
 saved_successfully#:#Änderungen wurden gespeichert
 show_older_versions#:#Ältere Versionen anzeigen
+sort_comments_asc#:#Anzahl Kommentare, aufsteigend
+sort_comments_desc#:#Anzahl Kommentare, absteigend
+sort_creation_asc#:#Erstellungsdatum, aufsteigend
+sort_creation_desc#:#Erstellungsdatum, absteigend
+sort_name_asc#:#Name, aufsteigend
+sort_name_desc#:#Name, absteigend
+sort_update_asc#:#Aktualisierungsdatum, aufsteigend
+sort_update_desc#:#Aktualisierungsdatum, absteigend
 update_comment#:#Kommentar aktualisieren
 update_posting#:#Beitrag aktualisieren
 status#:#Status

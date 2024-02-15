@@ -73,7 +73,8 @@ class ilLfDebatePlugin extends ilRepositoryObjectPlugin
             self::$finstance["domain"] = new DomainFactory(
                 $DIC,
                 $this->data(),
-                $this->repo()
+                $this->repo(),
+                $this
             );
     }
 

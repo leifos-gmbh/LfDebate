@@ -10,6 +10,7 @@ confirm_deletion_posting#:#Do you really want to delete the posting? Please note
 contra#:#Objection
 contra_info#:#Select this category if you disagree with the posting or comment.
 crs_create_xdbt#:#Create Debate
+default_sortation#:#Default Order
 exclamation#:#Exclamation
 exclamation_info#:#Select this category if you consider the post or comment to be particularly important or if you would like to reinforce it with further information.
 fold_create_xdbt#:#Create Debate
@@ -18,8 +19,8 @@ neutral#:#Neutral
 obj_xdbt#:#Debate
 obj_xdbt_duplicate#:#Copy
 obj_xdbt_select#:#Select Debate
-objs_xdbt#:#Debats
-objs_xdbt_duplicate#:#Copy Debats
+objs_xdbt#:#Debates
+objs_xdbt_duplicate#:#Copy Debate
 offline#:#Offline
 older_versions#:#Older Versions
 posting_created#:#Posting has been added
@@ -33,6 +34,14 @@ question_info#:#Select this category if you have a query about the post or comme
 root_create_xdbt#:#Create Debate
 saved_successfully#:#Changes have been saved
 show_older_versions#:#Show Older Versions
+sort_comments_asc#:#Number of Comments, Ascending
+sort_comments_desc#:#Number of Comments, Descending
+sort_creation_asc#:#Creation Date, Ascending
+sort_creation_desc#:#Creation Date, Descending
+sort_name_asc#:#Name, Ascending
+sort_name_desc#:#Name, Descending
+sort_update_asc#:#Last Update, Ascending
+sort_update_desc#:#Last Update, Descending
 update_comment#:#Update Comment
 update_posting#:#Update Posting
 status#:#Status

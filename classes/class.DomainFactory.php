@@ -30,6 +30,10 @@ use ILIAS\Refinery;
 class DomainFactory
 {
     /**
+     * @var \ilRepositoryObjectPlugin
+     */
+    protected $plugin;
+    /**
      * @var Container
      */
     protected $DIC;
@@ -45,11 +49,13 @@ class DomainFactory
     public function __construct(
         Container $DIC,
         DataFactory $data,
-        RepoFactory $repo
+        RepoFactory $repo,
+        \ilRepositoryObjectPlugin $plugin
     ) {
         $this->DIC = $DIC;
         $this->repo = $repo;
         $this->data = $data;
+        $this->plugin = $plugin;
     }
 
     //
@@ -73,6 +79,16 @@ class DomainFactory
             $ref_id,
             $this->user()->getId(),
         );
+    }
+
+    public function sorting(\ilObjLfDebate $debate):Sorting
+    {
+        return new Sorting($this, $debate);
+    }
+
+    public function plugin():\ilRepositoryObjectPlugin
+    {
+        return $this->plugin;
     }
 
     //

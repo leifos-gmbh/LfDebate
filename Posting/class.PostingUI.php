@@ -25,6 +25,10 @@ use ILIAS\UI\Component\Symbol\Avatar\Avatar;
 class PostingUI
 {
     /**
+     * @var string
+     */
+    protected $title_link;
+    /**
      * @var \ilLfDebatePlugin
      */
     protected $plugin;
@@ -89,7 +93,8 @@ class PostingUI
         string $create_date,
         string $last_edit,
         string $title,
-        string $text
+        string $text,
+        string $title_link = ""
     ) {
         global $DIC;
 
@@ -101,6 +106,7 @@ class PostingUI
         $this->last_edit = $last_edit;
         $this->title = $title;
         $this->text = $text;
+        $this->title_link = $title_link;
 
         $this->lng = $DIC->language();
         $this->ui_fac = $DIC->ui()->factory();
@@ -129,6 +135,9 @@ class PostingUI
     {
         $tpl->setVariable("TYPE", $this->type);
         $tpl->setVariable("AVATAR", $this->ui_ren->render($this->avatar));
+        $title = ($this->title_link === "")
+            ? $this->glyph . $this->title
+            : "<a href='" . $this->title_link . "'>" . $this->glyph . $this->title . "</a>";
         $tpl->setVariable("NAME", $this->name);
         $tpl->setVariable("DATE", $this->create_date);
         if ($this->last_edit !== "") {
@@ -136,7 +145,7 @@ class PostingUI
             $tpl->setVariable("EDIT", $this->lng->txt("last_change") . " " . $this->last_edit);
             $tpl->parseCurrentBlock();
         }
-        $tpl->setVariable("TITLE", $this->glyph . $this->title);
+        $tpl->setVariable("TITLE", $title);
         $tpl->setVariable("TEXT", nl2br($this->text));
     }
 

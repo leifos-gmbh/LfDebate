@@ -56,37 +56,62 @@ class PostingManager
     /**
      * @return Posting[]
      */
-    public function getLatestTopPostings(): array
+    public function getTopPostings(int $sorting): array
     {
-        $all = $this->repo->posting()->getTopEntries($this->obj_id);
-        $latest = [];
-        $temp_id = 0;
+        $repo = $this->repo->posting();
+        $all = $repo->getTopEntries($this->obj_id);
+        $all_arr = [];
         foreach ($all as $posting) {
-            if ($temp_id !== $posting->getId()) {
-                $latest[] = $posting;
-            }
-            $temp_id = $posting->getId();
+            $parr = [];
+            $parr["posting"] = $posting;
+            $parr["create_date"] = $posting->getCreateDate();
+            $parr["initial_creation"] = $repo->getInitialCreation($posting->getId());
+            $parr["name"] = \ilUserUtil::getNamePresentation($posting->getUserId());
+            $parr["nr_comments"] = $repo->getNrOfComments($posting->getId());
+            $all_arr[] = $parr;
         }
+        switch ($sorting) {
+            case Sorting::NAME_ASC:
+                $all_arr = \ilUtil::sortArray($all_arr, "name", "asc");
+                break;
+            case Sorting::NAME_DESC:
+                $all_arr = \ilUtil::sortArray($all_arr, "name", "desc");
+                break;
+            case Sorting::CREATION_ASC:
+                $all_arr = \ilUtil::sortArray($all_arr, "initial_creation", "asc");
+                break;
+            case Sorting::CREATION_DESC:
+                $all_arr = \ilUtil::sortArray($all_arr, "initial_creation", "desc");
+                break;
+            case Sorting::UPDATE_ASC:
+                $all_arr = \ilUtil::sortArray($all_arr, "create_date", "asc");
+                break;
+            case Sorting::UPDATE_DESC:
+                $all_arr = \ilUtil::sortArray($all_arr, "create_date", "desc");
+                break;
+            case Sorting::COMMENTS_ASC:
+                $all_arr = \ilUtil::sortArray($all_arr, "nr_comments", "asc");
+                break;
+            case Sorting::COMMENTS_DESC:
+                $all_arr = \ilUtil::sortArray($all_arr, "nr_comments", "desc");
+                break;
+        }
+        return array_map(static function ($item) {
+            return $item["posting"];
+        }, $all_arr);
+    }
 
-        return $latest;
+    public function getInitialCreation(int $posting_id) : string
+    {
+        return $this->repo->posting()->getInitialCreation($posting_id);
     }
 
     /**
      * @return Posting[]
      */
-    public function getLatestCommentsOfTopPosting(int $id): array
+    public function getCommentsOfPosting(int $id): array
     {
-        $all = $this->repo->posting()->getSubEntries($this->obj_id, $id);
-        $latest = [];
-        $temp_id = 0;
-        foreach ($all as $comment) {
-            if ($temp_id !== $comment->getId()) {
-                $latest[] = $comment;
-            }
-            $temp_id = $comment->getId();
-        }
-
-        return $latest;
+        return $this->repo->posting()->getSubEntries($this->obj_id, $id);
     }
 
     /**
@@ -94,13 +119,13 @@ class PostingManager
      */
     public function getSubCommentsOfComment(int $id): array
     {
-        return $this->getLatestCommentsOfTopPosting($id);
+        return $this->getCommentsOfPosting($id);
     }
 
     public function getPosting(int $id, ?int $version = null): Posting
     {
         if ($version === null) {
-            $version = $this->getCurrentVersionOfPosting($id);
+            $version = 0;
         }
         return $this->repo->posting()->getPosting($this->obj_id, $id, $version);
     }
@@ -112,13 +137,13 @@ class PostingManager
      */
     public function getOlderVersionsOfPosting(int $id): array
     {
-        $version = $this->getCurrentVersionOfPosting($id);
+        $version = $this->getMaxVersionOfPosting($id);
         if ($version === 0) {
             return [];
         }
         $postings = [];
         while ($version > 0) {
-            $postings[] = $this->getPosting($id, --$version);
+            $postings[] = $this->getPosting($id, $version--);
         }
 
         return $postings;
@@ -173,19 +198,18 @@ class PostingManager
             $new_title,
             $new_description,
             $posting->getType(),
-            \ilUtil::now(),
-            $posting->getVersion() + 1
+            \ilUtil::now()
         );
     }
 
-    protected function getCurrentVersionOfPosting(int $id): int
+    protected function getMaxVersionOfPosting(int $id): int
     {
         return $this->repo->posting()->getMaxVersion($id);
     }
 
     public function deleteTopPosting(int $id): void
     {
-        foreach ($this->getLatestCommentsOfTopPosting($id) as $comment) {
+        foreach ($this->getCommentsOfPosting($id) as $comment) {
             foreach ($this->getSubCommentsOfComment($comment->getId()) as $sub_comment) {
                 $this->repo->posting()->delete($sub_comment->getId());
             }
