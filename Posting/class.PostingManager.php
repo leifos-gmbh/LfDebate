@@ -236,4 +236,35 @@ class PostingManager
         $this->repo->posting()->deleteAll($this->obj_id);
         $this->repo->posting()->removeAllFromTree($this->obj_id);
     }
+
+    public function getContributors(): array
+    {
+        $repo = $this->repo->posting();
+        $contribs = [];
+        foreach ($repo->getContributorIds($this->obj_id) as $id) {
+            $name = \ilObjUser::_lookupName($id);
+            $contribs[] = [
+                "id" => $id,
+                "firstname" => $name["firstname"],
+                "lastname" => $name["lastname"],
+                "sort" => $name["lastname"] . $name["firstname"]
+            ];
+        }
+        $contribs = \ilUtil::sortArray($contribs, "sort", "asc");
+        return $contribs;
+    }
+
+    public function exportContributor(int $user_id) : void
+    {
+        $name = \ilObjUser::_lookupName($user_id);
+        \ilUtil::deliverData(
+            $this->getContributionsOfUserAsText($user_id),
+            $name["lastname"] . "_" . $name["firstname"] . ".txt"
+        );
+    }
+
+    public function getContributionsOfUserAsText(int $user_id) : string
+    {
+        return (string) $user_id;
+    }
 }

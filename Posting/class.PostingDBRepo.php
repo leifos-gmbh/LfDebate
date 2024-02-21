@@ -280,4 +280,19 @@ class PostingDBRepo
             [$obj_id]
         );
     }
+
+    public function getContributorIds(int $obj_id): array
+    {
+        $set = $this->db->queryF("SELECT DISTINCT p.user_id FROM xdbt_posting p JOIN xdbt_post_tree t ON (t.child = p.id)" .
+            " WHERE t.xdbt_obj_id = %s ",
+            ["integer"],
+            [$obj_id]
+        );
+        $ids = [];
+        while ($rec = $this->db->fetchAssoc($set)) {
+            $ids[] = (int) $rec["user_id"];
+        }
+        return $ids;
+    }
+
 }

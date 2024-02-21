@@ -54,6 +54,11 @@ class GUIFactory
         $this->domain_factory = $domain_factory;
     }
 
+    public function export(int $obj_id): \Leifos\Debate\Export\ExportGUI
+    {
+        return new \Leifos\Debate\Export\ExportGUI($this->domain_factory, $this, $obj_id);
+    }
+
     public function posting(
         \ilLfDebatePlugin $plugin,
         string $type,
@@ -138,5 +143,15 @@ class GUIFactory
             $this->http,
             $this->domain_factory->refinery()
         );
+    }
+
+    public function ui() : \ILIAS\DI\UIServices
+    {
+        return $this->DIC->ui();
+    }
+
+    public function ctrl() : \ilCtrl
+    {
+        return $this->DIC->ctrl();
     }
 }

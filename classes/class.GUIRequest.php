@@ -71,4 +71,9 @@ class GUIRequest
         return (int) $this->http->request()->getQueryParams()["sortation"];
     }
 
+    public function getContributor(): int
+    {
+        return (int) $this->http->request()->getQueryParams()["contrib"];
+    }
+
 }

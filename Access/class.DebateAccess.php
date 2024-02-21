@@ -111,4 +111,14 @@ class DebateAccess
 
         return $this->access->checkAccessOfUser($user_id, "write", $this->ref_id);
     }
+
+    public function canExportPostings(int $user_id = 0): bool
+    {
+        if ($user_id === 0) {
+            $user_id = $this->user_id;
+        }
+
+        return $this->access->checkAccessOfUser($user_id, "write", $this->ref_id);
+    }
+
 }

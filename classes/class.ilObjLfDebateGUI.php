@@ -260,6 +260,10 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $this->toolbar->addButtonInstance($add_post_button);
         }
 
+        if ($this->access_wrapper->canExportPostings()) {
+            $this->gui->export($this->object->getId())->addExportButton($this->toolbar);
+        }
+
         $sorting = $this->domain->sorting($this->object);
         $sort = $this->ui_fac->viewControl()->sortation(
             $sorting->getAllOptions()
@@ -553,5 +557,11 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $sorting = $this->domain->sorting($this->object);
         $sorting->setCurrentSorting($this->gui->request()->getSorting());
         $this->ctrl->redirect($this, "showAllPostings");
+    }
+
+    public function exportContributor()
+    {
+        $pm = $this->domain->posting($this->object->getId());
+        $pm->exportContributor($this->gui->request()->getContributor());
     }
 }
