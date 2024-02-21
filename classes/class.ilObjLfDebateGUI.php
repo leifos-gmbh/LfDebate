@@ -559,8 +559,11 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->ctrl->redirect($this, "showAllPostings");
     }
 
-    public function exportContributor()
+    public function exportContributor() : void
     {
+        if (!$this->access_wrapper->canExportPostings()) {
+            return;
+        }
         $pm = $this->domain->posting($this->object->getId());
         $pm->exportContributor($this->gui->request()->getContributor());
     }
