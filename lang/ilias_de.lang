@@ -13,6 +13,7 @@ crs_create_xdbt#:#Erstelle Debatte
 default_sortation#:#Standardsortierung
 exclamation#:#Bestärkung
 exclamation_info#:#Wählen Sie diese Kategorie, wenn Sie den Beitrag oder Kommentar für besonders wichtig erachten oder mit weiterführenden Informationen bestärken möchten.
+export#:#Export
 fold_create_xdbt#:#Erstelle Debatte
 grp_create_xdbt#:#Erstelle Debatte
 neutral#:#Neutral

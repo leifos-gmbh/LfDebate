@@ -77,24 +77,22 @@ class ExportGUI
 
         $pm = $this->domain->posting($this->obj_id);
 
-        $items = [];
-
+        $cards = [];
         foreach ($pm->getContributors() as $c) {
             $ctrl->setParameterByClass(\ilObjLfDebateGUI::class, "contrib", (string) $c["id"]);
-            $link = $f->link()->standard($c["lastname"] . ", " . $c["firstname"],
+            $button = $f->button()->standard($pl->txt("export"),
                 $ctrl->getLinkTargetByClass(\ilObjLfDebateGUI::class, "exportContributor")
             );
             $ctrl->setParameterByClass(\ilObjLfDebateGUI::class, "contrib", "");
-            $items[] = $f->item()
-                         ->standard($link)
-                ->withLeadImage(
-                    $f->image()->standard(
-                        \ilObjUser::_getPersonalPicturePath($c["id"], "xsmall"),
-                        $c["lastname"] . ", " . $c["firstname"]
-                    )
-                );
+            $image = $f->image()->standard(
+                \ilObjUser::_getPersonalPicturePath($c["id"], "xsmall"),
+                $c["lastname"] . ", " . $c["firstname"]
+            );
+            $cards[] = $f->card()->standard(
+                $c["lastname"] . ", " . $c["firstname"],
+                $image
+            )->withSections([$button]);
         }
-
-        return $f->panel()->standard($pl->txt("contributors"), $items);
+        return $f->deck($cards)->withNormalCardsSize();
     }
 }

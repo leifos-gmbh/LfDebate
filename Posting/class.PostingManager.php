@@ -257,6 +257,10 @@ class PostingManager
     public function exportContributor(int $user_id) : void
     {
         $name = \ilObjUser::_lookupName($user_id);
+
+        //echo nl2br($this->getContributionsOfUserAsText($user_id));
+        //exit;
+
         \ilUtil::deliverData(
             $this->getContributionsOfUserAsText($user_id),
             $name["lastname"] . "_" . $name["firstname"] . ".txt"
@@ -265,6 +269,24 @@ class PostingManager
 
     public function getContributionsOfUserAsText(int $user_id) : string
     {
-        return (string) $user_id;
+        $repo = $this->repo->posting();
+
+        $name = \ilObjUser::_lookupName($user_id);
+        $text = "Name: " . $name["lastname"] . ", " . $name["firstname"] . "\n\n";
+
+        /** @var Posting $p */
+        foreach ($repo->getContributionsOfUser($this->obj_id, $user_id) as $p) {
+            $desc = str_replace("\n", " ", $p->getDescription());
+            $desc = str_replace("\r", " ", $desc);
+            $desc = str_replace("  ", " ", $desc);
+            $desc = str_replace("  ", " ", $desc);
+            $text .= "Datum: " . $p->getCreateDate() . "\n";
+            $text .= "Titel: " . $p->getTitle() . "\n";
+            $text .= "Reaktion: " . $p->getType() . "\n";
+            $text .= $desc . "\n";
+            $text .= "\n";
+        }
+
+        return $text;
     }
 }

@@ -295,4 +295,19 @@ class PostingDBRepo
         return $ids;
     }
 
+    public function getContributionsOfUser(int $obj_id, int $user_id): array
+    {
+        $set = $this->db->queryF("SELECT * FROM xdbt_posting p JOIN xdbt_post_tree t ON (t.child = p.id) " .
+            " WHERE p.user_id = %s AND t.xdbt_obj_id = %s AND p.version = %s ORDER BY p.create_date DESC",
+            ["integer", "integer", "integer"],
+            [$user_id, $obj_id, 0]
+        );
+        $postings = [];
+        while ($rec = $this->db->fetchAssoc($set)) {
+            $postings[] = $this->getFromRecord($rec, $obj_id);
+        }
+
+        return $postings;
+    }
+
 }

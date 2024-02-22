@@ -13,6 +13,7 @@ crs_create_xdbt#:#Create Debate
 default_sortation#:#Default Order
 exclamation#:#Exclamation
 exclamation_info#:#Select this category if you consider the post or comment to be particularly important or if you would like to reinforce it with further information.
+export#:#Export
 fold_create_xdbt#:#Create Debate
 grp_create_xdbt#:#Create Debate
 neutral#:#Neutral
