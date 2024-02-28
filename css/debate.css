@@ -1,3 +1,42 @@
+.debate-pin {
+    float:right;
+    font-size: 140%;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+.glyph.debate-highlighted, .glyph.debate-highlighted:hover {
+    color: #da4d00;
+}
+
+.il-item.debate-sticky {
+    position: fixed;
+    top: 94px;
+    height: calc(50vh - 94px);
+    z-index: 1;
+    overflow: auto;
+    margin-right: 15px;
+}
+
+@media only screen and (max-width: 768px) {
+    .il-item.debate-sticky {
+        top: 45px;
+        height: calc(50vh - 94px);
+    }
+}
+
+.debate-reply.debate-sticky {
+    margin-top: calc(50vh - 74px);
+}
+
+#ilTab.debate-sticky {
+    display: none;
+}
+
+.il_HeaderInner.debate-sticky {
+    display: none;
+}
+
 .debate-item-outer {
     margin-bottom: 20px;
 }

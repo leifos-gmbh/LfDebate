@@ -114,6 +114,9 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->main_tpl->addCss(
             "./Customizing/global/plugins/Services/Repository/RepositoryObject/LfDebate/css/debate.css"
         );
+        $this->main_tpl->addJavascript(
+            "./Customizing/global/plugins/Services/Repository/RepositoryObject/LfDebate/js/debate.js"
+        );
         ilLinkifyUtil::initLinkify($this->main_tpl);
         $this->main_tpl->addOnloadCode(
             "il.ExtLink.autolink('.debate-item, .debate-comment','');"
