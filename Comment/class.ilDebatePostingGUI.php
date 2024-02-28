@@ -246,17 +246,31 @@ class ilDebatePostingGUI
         if ($initial_creation !== $posting->getCreateDate()) {
             $last_edit = $posting->getCreateDate();
         }
-        $pos_type = $comment ? "comment" : "posting";
-        $posting_ui = $this->gui->$pos_type(
-            $this->dbt_plugin,
-            $posting->getType(),
-            $avatar,
-            $name,
-            $initial_creation,
-            $last_edit,
-            $posting->getTitle(),
-            $posting->getDescription()
-        );
+        if ($comment) {
+            $posting_ui = $this->gui->comment(
+                $this->dbt_plugin,
+                $posting->getType(),
+                $avatar,
+                $name,
+                $initial_creation,
+                $last_edit,
+                $posting->getTitle(),
+                $posting->getDescription()
+            );
+        } else {
+            $posting_ui = $this->gui->posting(
+                $this->dbt_plugin,
+                $posting->getType(),
+                $avatar,
+                $name,
+                $initial_creation,
+                $last_edit,
+                $posting->getTitle(),
+                $posting->getDescription(),
+                "",
+                true
+            );
+        }
 
         return $posting_ui;
     }

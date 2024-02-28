@@ -25,6 +25,10 @@ use ILIAS\UI\Component\Symbol\Avatar\Avatar;
 class PostingUI
 {
     /**
+     * @var bool
+     */
+    protected $showpin;
+    /**
      * @var string
      */
     protected $title_link;
@@ -94,10 +98,12 @@ class PostingUI
         string $last_edit,
         string $title,
         string $text,
-        string $title_link = ""
+        string $title_link = "",
+        bool $showpin = false
     ) {
         global $DIC;
 
+        $this->showpin = $showpin;
         $this->plugin = $plugin;
         $this->type = $type;
         $this->avatar = $avatar;
@@ -147,9 +153,11 @@ class PostingUI
         }
         $tpl->setVariable("TITLE", $title);
         $tpl->setVariable("TEXT", nl2br($this->text));
-        $tpl->setVariable("PIN", $this->ui_ren->render(
-            $this->ui_fac->symbol()->glyph()->note()
-        ));
+        if ($this->showpin) {
+            $tpl->setVariable("PIN", $this->ui_ren->render(
+                $this->ui_fac->symbol()->glyph()->note()
+            ));
+        }
     }
 
     protected function maybeSetActions(\ilTemplate $tpl): void

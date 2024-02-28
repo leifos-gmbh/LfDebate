@@ -12,7 +12,8 @@
 .il-item.debate-sticky {
     position: fixed;
     top: 94px;
-    height: calc(50vh - 94px);
+    min-height: calc(40vh - 94px);
+    max-height: calc(50vh - 94px);
     z-index: 1;
     overflow: auto;
     margin-right: 15px;
@@ -21,7 +22,7 @@
 @media only screen and (max-width: 768px) {
     .il-item.debate-sticky {
         top: 45px;
-        height: calc(50vh - 94px);
+        max-height: calc(50vh - 94px);
     }
 }
 
@@ -34,7 +35,10 @@
 }
 
 .il_HeaderInner.debate-sticky {
-    display: none;
+    height: 0px;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
 }
 
 .debate-item-outer {

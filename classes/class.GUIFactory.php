@@ -68,7 +68,8 @@ class GUIFactory
         string $last_edit,
         string $title,
         string $text,
-        string $title_link = ""
+        string $title_link = "",
+        bool $show_pin = false
     ): PostingUI {
         return new PostingUI(
             $plugin,
@@ -79,7 +80,8 @@ class GUIFactory
             $last_edit,
             $title,
             $text,
-            $title_link
+            $title_link,
+            $show_pin
         );
     }
 
