@@ -205,7 +205,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $this->lng->txt("online")
         )->withValue($object->isOnline());
 
-        $default_sorting = $this->ui_fac->input()->field()->select(
+        $default_sortation = $this->ui_fac->input()->field()->select(
             $this->txt("default_sortation"),
             $this->domain->sorting($object)->getAllOptions()
         )->withValue($object->getDefaultSortation())->withRequired(true);
@@ -215,7 +215,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             ["title" => $title,
              "description" => $description,
              "online" => $online,
-             "default_sorting" => $default_sorting],
+             "default_sortation" => $default_sortation],
             $this->txt("obj_xdbt")
         );
 
@@ -237,6 +237,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
                 $object->setTitle($props["title"]);
                 $object->setDescription($props["description"]);
                 $object->setOnline((bool) $props["online"]);
+                $object->setDefaultSortation((int) $props["default_sortation"]);
                 $object->update();
 
                 $this->tpl->setOnScreenMessage("success", $this->txt("saved_successfully"), true);
