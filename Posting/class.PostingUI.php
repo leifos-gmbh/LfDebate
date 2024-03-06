@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Leifos\Debate;
 
+use ILIAS\UI\Component\Link\Link;
 use ILIAS\UI\Component\Symbol\Avatar\Avatar;
 
 class PostingUI
@@ -68,6 +69,10 @@ class PostingUI
      * @var array
      */
     protected $actions = [];
+    /**
+     * @var Link[]
+     */
+    protected $attachments = [];
     /**
      * @var string
      */
@@ -127,12 +132,20 @@ class PostingUI
         return $clone;
     }
 
+    public function withAttachments(array $attachments): self
+    {
+        $clone = clone($this);
+        $clone->attachments = $attachments;
+        return $clone;
+    }
+
     public function render(): string
     {
         $tpl = $this->plugin->getTemplate("tpl.debate_item.html", true, true);
 
         $this->fillHTML($tpl);
         $this->maybeSetActions($tpl);
+        $this->maybeSetAttachments($tpl);
 
         return $tpl->get();
     }
@@ -172,6 +185,16 @@ class PostingUI
             }
             $tpl->setCurrentBlock("actions");
             $tpl->setVariable("ACTIONS", $action_html);
+            $tpl->parseCurrentBlock();
+        }
+    }
+
+    protected function maybeSetAttachments(\ilTemplate $tpl): void
+    {
+        if (count($this->attachments) > 0) {
+            $att_html = $this->ui_ren->render($this->ui_fac->listing()->unordered($this->attachments));
+            $tpl->setCurrentBlock("attachments");
+            $tpl->setVariable("ATTACHMENTS", $att_html);
             $tpl->parseCurrentBlock();
         }
     }

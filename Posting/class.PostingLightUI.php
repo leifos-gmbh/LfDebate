@@ -20,6 +20,8 @@ declare(strict_types=1);
 
 namespace Leifos\Debate;
 
+use ILIAS\UI\Component\Link\Link;
+
 class PostingLightUI
 {
     /**
@@ -43,6 +45,18 @@ class PostingLightUI
      */
     protected $text = "";
     /**
+     * @var Link[]
+     */
+    protected $attachments = [];
+    /**
+     * @var \ILIAS\UI\Factory
+     */
+    protected $ui_fac;
+    /**
+     * @var \ILIAS\UI\Renderer
+     */
+    protected $ui_ren;
+    /**
      * @var \ilTemplate
      */
     protected $main_tpl;
@@ -62,7 +76,16 @@ class PostingLightUI
         $this->title = $title;
         $this->text = $text;
 
+        $this->ui_fac = $DIC->ui()->factory();
+        $this->ui_ren = $DIC->ui()->renderer();
         $this->main_tpl = $DIC->ui()->mainTemplate();
+    }
+
+    public function withAttachments(array $attachments): self
+    {
+        $clone = clone($this);
+        $clone->attachments = $attachments;
+        return $clone;
     }
 
     public function render(): string
@@ -73,6 +96,7 @@ class PostingLightUI
         $tpl = $this->plugin->getTemplate("tpl.debate_item_light.html", true, true);
 
         $this->fillHTML($tpl);
+        $this->maybeSetAttachments($tpl);
 
         return $tpl->get();
     }
@@ -83,5 +107,15 @@ class PostingLightUI
         $tpl->setVariable("DATE", $this->create_date);
         $tpl->setVariable("TITLE", $this->title);
         $tpl->setVariable("TEXT", nl2br($this->text));
+    }
+
+    protected function maybeSetAttachments(\ilTemplate $tpl): void
+    {
+        if (count($this->attachments) > 0) {
+            $att_html = $this->ui_ren->render($this->ui_fac->listing()->unordered($this->attachments));
+            $tpl->setCurrentBlock("attachments");
+            $tpl->setVariable("ATTACHMENTS", $att_html);
+            $tpl->parseCurrentBlock();
+        }
     }
 }

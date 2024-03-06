@@ -134,3 +134,43 @@ $ilDB->manipulateF("DELETE FROM xdbt_posting WHERE " .
 );
 
 ?>
+<#10>
+<?php
+$fields = [
+    "id" => [
+        "type" => "integer",
+        "length" => 4,
+        "notnull" => true,
+        "default" => 0
+    ],
+    "posting_id" => [
+        "type" => "integer",
+        "length" => 4,
+        "notnull" => true,
+        "default" => 0
+    ],
+    "rid" => [
+        "type" => "text",
+        "length" => 4000,
+        "notnull" => true,
+        "default" => 0
+    ],
+    "create_version" => [
+        "type" => "integer",
+        "length" => 2,
+        "notnull" => false,
+        "default" => 0
+    ],
+    "delete_version" => [
+        "type" => "integer",
+        "length" => 2,
+        "notnull" => false,
+        "default" => 0
+    ]
+];
+if(!$ilDB->tableExists("xdbt_posting_att")) {
+    $ilDB->createTable("xdbt_posting_att", $fields);
+    $ilDB->addPrimaryKey("xdbt_posting_att", ["id"]);
+    $ilDB->createSequence("xdbt_posting_att");
+}
+?>

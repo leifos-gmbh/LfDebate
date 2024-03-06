@@ -48,4 +48,21 @@ class DataFactory
             $version
         );
     }
+
+    public function attachment(
+        int $id,
+        int $posting_id,
+        string $rid,
+        int $create_version,
+        int $delete_version
+    ): Attachment
+    {
+        return new Attachment(
+            $id,
+            $posting_id,
+            $rid,
+            $create_version,
+            $delete_version
+        );
+    }
 }

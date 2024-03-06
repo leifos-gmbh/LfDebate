@@ -26,6 +26,7 @@ use Leifos\Debate\Posting;
 use Leifos\Debate\PostingLightUI;
 use Leifos\Debate\PostingUI;
 use Leifos\Debate\PostingManager;
+use ILIAS\ResourceStorage\Services as ResourceStorage;
 use ILIAS\UI;
 use ILIAS\UI\Component\Input\Container\Form\Form;
 use Psr\Http\Message\ServerRequestInterface;
@@ -70,6 +71,10 @@ class ilDebatePostingGUI
      */
     protected $request;
     /**
+     * @var ResourceStorage
+     */
+    protected $res_storage;
+    /**
      * @var PostingManager
      */
     protected $posting_manager;
@@ -111,6 +116,7 @@ class ilDebatePostingGUI
         $this->ui_fac = $DIC->ui()->factory();
         $this->ui_ren = $DIC->ui()->renderer();
         $this->request = $DIC->http()->request();
+        $this->res_storage = $DIC->resourceStorage();
 
         $this->dbt_object = $dbt_obj;
         $this->dbt_plugin = $dbt_plugin;
@@ -126,6 +132,10 @@ class ilDebatePostingGUI
 
         $next_class = $this->ctrl->getNextClass($this);
         switch ($next_class) {
+            case "ildebatepostinguploadhandlergui":
+                $post_upl_gui = new ilDebatePostingUploadHandlerGUI();
+                $this->ctrl->forwardCommand($post_upl_gui);
+                break;
             default:
                 $cmd = $this->ctrl->getCmd("showPosting");
                 $this->$cmd();
@@ -230,6 +240,9 @@ class ilDebatePostingGUI
             $posting->getDescription()
         );
 
+        $attachments = $this->getAttachments($posting);
+        $posting_ui = $posting_ui->withAttachments($attachments);
+
         return $posting_ui;
     }
 
@@ -271,6 +284,9 @@ class ilDebatePostingGUI
                 true
             );
         }
+
+        $attachments = $this->getAttachments($posting);
+        $posting_ui = $posting_ui->withAttachments($attachments);
 
         return $posting_ui;
     }
@@ -358,6 +374,28 @@ class ilDebatePostingGUI
         return $actions;
     }
 
+    /**
+     * @return UI\Component\Link\Link[]
+     */
+    protected function getAttachments(Posting $posting): array
+    {
+        $attachments = [];
+        foreach ($this->posting_manager->getAttachments($posting->getId(), $posting->getVersion()) as $att) {
+            if (($rid = $att->getRid()) &&
+                ($identification = $this->res_storage->manage()->find($rid))) {
+                $this->ctrl->setParameter($this, "rid", $rid);
+                $title = $this->res_storage->manage()->getCurrentRevision($identification)->getTitle();
+                $attachments[] = $this->ui_fac->link()->standard(
+                    $title,
+                    $this->ctrl->getLinkTarget($this, "downloadAttachment")
+                );
+                $this->ctrl->clearParameterByClass(self::class, "rid");
+            }
+        }
+
+        return $attachments;
+    }
+
     protected function addComment(): void
     {
         if (!$this->access_wrapper->canAddComments()) {
@@ -418,11 +456,19 @@ class ilDebatePostingGUI
             $type = $type->withValue(CommentUI::TYPE_INITIAL);
         }
 
+        $files = $this->ui_fac->input()->field()->file(
+            new ilDebatePostingUploadHandlerGUI(),
+            $this->lng->txt("attachment"),
+            $this->lng->txt("attachment_info") // Info mit unterstützten Dateiformaten?
+        );
+        //->withAcceptedMimeTypes() // ILIAS whitelist oder manuell?
+
         $section_title = $edit ? $this->dbt_plugin->txt("update_comment") : $this->dbt_plugin->txt("add_comment");
         $section_inputs = ["title" => $title,
                            "description" => $description];
         if (!$edit) {
             $section_inputs["type"] = $type;
+            $section_inputs["files"] = $files;
         }
         $section = $this->ui_fac->input()->field()->section(
             $section_inputs,
@@ -473,7 +519,8 @@ class ilDebatePostingGUI
                         $parent_id,
                         $props["title"],
                         $props["description"],
-                        $props["type"]
+                        $props["type"],
+                        $props["files"][0] ?? ""
                     );
                     $this->tpl->setOnScreenMessage("success", $this->dbt_plugin->txt("comment_created"), true);
                 }
@@ -500,5 +547,13 @@ class ilDebatePostingGUI
 
         $this->tpl->setOnScreenMessage("success", $this->dbt_plugin->txt("comment_deleted"), true);
         $this->ctrl->redirect($this, "showPosting");
+    }
+
+    protected function downloadAttachment(): void
+    {
+        $rid = $this->gui->request()->getResourceID();
+        if ($identification = $this->res_storage->manage()->find($rid)) {
+            $this->res_storage->consume()->download($identification)->run();
+        }
     }
 }

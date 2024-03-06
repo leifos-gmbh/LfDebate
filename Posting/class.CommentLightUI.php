@@ -30,6 +30,7 @@ class CommentLightUI extends PostingLightUI
         $tpl = $this->plugin->getTemplate("tpl.debate_comment_light.html", true, true);
 
         $this->fillHTML($tpl);
+        $this->maybeSetAttachments($tpl);
 
         return $tpl->get();
     }

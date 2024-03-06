@@ -20,8 +20,6 @@ declare(strict_types=1);
 
 namespace Leifos\Debate;
 
-use Leifos\Debate\DataFactory;
-
 class PostingDBRepo
 {
     /**

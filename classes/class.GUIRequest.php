@@ -76,4 +76,8 @@ class GUIRequest
         return (int) $this->http->request()->getQueryParams()["contrib"];
     }
 
+    public function getResourceID(): string
+    {
+        return (string) $this->http->request()->getQueryParams()["rid"];
+    }
 }

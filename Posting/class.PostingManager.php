@@ -58,16 +58,16 @@ class PostingManager
      */
     public function getTopPostings(int $sorting): array
     {
-        $repo = $this->repo->posting();
-        $all = $repo->getTopEntries($this->obj_id);
+        $post_repo = $this->repo->posting();
+        $all = $post_repo->getTopEntries($this->obj_id);
         $all_arr = [];
         foreach ($all as $posting) {
             $parr = [];
             $parr["posting"] = $posting;
             $parr["create_date"] = $posting->getCreateDate();
-            $parr["initial_creation"] = $repo->getInitialCreation($posting->getId());
+            $parr["initial_creation"] = $post_repo->getInitialCreation($posting->getId());
             $parr["name"] = \ilUserUtil::getNamePresentation($posting->getUserId());
-            $parr["nr_comments"] = $repo->getNrOfComments($posting->getId());
+            $parr["nr_comments"] = $post_repo->getNrOfComments($posting->getId());
             $all_arr[] = $parr;
         }
         switch ($sorting) {
@@ -149,7 +149,11 @@ class PostingManager
         return $postings;
     }
 
-    public function createTopPosting(string $title, string $description): void {
+    public function createTopPosting(
+        string $title,
+        string $description,
+        string $file_id
+    ): void {
         $user_id = $this->domain->user()->getId();
         $posting_id = $this->repo->posting()->create(
             $user_id,
@@ -157,6 +161,11 @@ class PostingManager
             $description,
             CommentUI::TYPE_INITIAL,
             \ilUtil::now()
+        );
+
+        $this->repo->attachment()->create(
+            $posting_id,
+            $file_id
         );
 
         $this->repo->posting()->addToTree(
@@ -169,7 +178,8 @@ class PostingManager
         int $parent_id,
         string $title,
         string $description,
-        string $type
+        string $type,
+        string $file_id
     ): void {
         $user_id = $this->domain->user()->getId();
         $posting_id = $this->repo->posting()->create(
@@ -178,6 +188,11 @@ class PostingManager
             $description,
             $type,
             \ilUtil::now()
+        );
+
+        $this->repo->attachment()->create(
+            $posting_id,
+            $file_id
         );
 
         $this->repo->posting()->addToTree(
@@ -200,6 +215,12 @@ class PostingManager
             $posting->getType(),
             \ilUtil::now()
         );
+
+        $max_post_version = $this->getMaxVersionOfPosting($posting->getId());
+        $this->repo->attachment()->update(
+            $posting,
+            $max_post_version
+        );
     }
 
     protected function getMaxVersionOfPosting(int $id): int
@@ -212,11 +233,14 @@ class PostingManager
         foreach ($this->getCommentsOfPosting($id) as $comment) {
             foreach ($this->getSubCommentsOfComment($comment->getId()) as $sub_comment) {
                 $this->repo->posting()->delete($sub_comment->getId());
+                $this->repo->attachment()->deleteForPosting($sub_comment->getId());
             }
             $this->repo->posting()->delete($comment->getId());
+            $this->repo->attachment()->deleteForPosting($comment->getId());
             $this->repo->posting()->removeChildsFromTree($comment->getId());
         }
         $this->repo->posting()->delete($id);
+        $this->repo->attachment()->deleteForPosting($id);
         $this->repo->posting()->removeChildsFromTree($id);
         $this->repo->posting()->removeFromTree($id);
     }
@@ -225,8 +249,10 @@ class PostingManager
     {
         foreach ($this->getSubCommentsOfComment($id) as $sub_comment) {
             $this->repo->posting()->delete($sub_comment->getId());
+            $this->repo->attachment()->deleteForPosting($sub_comment->getId());
         }
         $this->repo->posting()->delete($id);
+        $this->repo->attachment()->deleteForPosting($id);
         $this->repo->posting()->removeChildsFromTree($id);
         $this->repo->posting()->removeFromTree($id);
     }
@@ -234,14 +260,15 @@ class PostingManager
     public function deleteAll(): void
     {
         $this->repo->posting()->deleteAll($this->obj_id);
+        $this->repo->attachment()->deleteAll($this->obj_id);
         $this->repo->posting()->removeAllFromTree($this->obj_id);
     }
 
     public function getContributors(): array
     {
-        $repo = $this->repo->posting();
+        $post_repo = $this->repo->posting();
         $contribs = [];
-        foreach ($repo->getContributorIds($this->obj_id) as $id) {
+        foreach ($post_repo->getContributorIds($this->obj_id) as $id) {
             $name = \ilObjUser::_lookupName($id);
             $contribs[] = [
                 "id" => $id,
@@ -269,13 +296,13 @@ class PostingManager
 
     public function getContributionsOfUserAsText(int $user_id) : string
     {
-        $repo = $this->repo->posting();
+        $post_repo = $this->repo->posting();
 
         $name = \ilObjUser::_lookupName($user_id);
         $text = "Name: " . $name["lastname"] . ", " . $name["firstname"] . "\n\n";
 
         /** @var Posting $p */
-        foreach ($repo->getContributionsOfUser($this->obj_id, $user_id) as $p) {
+        foreach ($post_repo->getContributionsOfUser($this->obj_id, $user_id) as $p) {
             $desc = str_replace("\n", " ", $p->getDescription());
             $desc = str_replace("\r", " ", $desc);
             $desc = str_replace("  ", " ", $desc);
@@ -288,5 +315,13 @@ class PostingManager
         }
 
         return $text;
+    }
+
+    /**
+     * @return Attachment[]
+     */
+    public function getAttachments(int $posting_id, int $version = 0): array
+    {
+        return $this->repo->attachment()->getAttachmentsForPosting($posting_id, $version);
     }
 }

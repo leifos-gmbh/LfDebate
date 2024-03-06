@@ -24,6 +24,7 @@ use Leifos\Debate\PostingLightUI;
 use Leifos\Debate\PostingManager;
 use Leifos\Debate\PostingUI;
 use Leifos\Debate\GUIFactory;
+use ILIAS\ResourceStorage\Services as ResourceStorage;
 use ILIAS\UI;
 use ILIAS\UI\Component\Input\Container\Form\Form;
 use Psr\Http\Message\ServerRequestInterface;
@@ -72,6 +73,10 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
      */
     protected $request;
     /**
+     * @var ResourceStorage
+     */
+    protected $res_storage;
+    /**
      * @var UI\Component\Component[]
      */
     protected $ui_comps = [];
@@ -86,6 +91,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->ui_ren = $DIC->ui()->renderer();
         $this->request = $DIC->http()->request();
         $this->main_tpl = $DIC->ui()->mainTemplate();
+        $this->res_storage = $DIC->resourceStorage();
 
         /** @var ilLfDebatePlugin $plugin */
         $plugin = $this->plugin;
@@ -129,6 +135,10 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
                 $this->ctrl->saveParameterByClass("ildebatepostinggui", "post_id");
                 //$this->ctrl->saveParameterByClass("ildebatepostinggui", "cmt_id");
                 $this->ctrl->forwardCommand($dbt_pos);
+                break;
+            case "ildebatepostinguploadhandlergui":
+                $post_upl_gui = new ilDebatePostingUploadHandlerGUI();
+                $this->ctrl->forwardCommand($post_upl_gui);
                 break;
             default:
                 parent::executeCommand();
@@ -314,6 +324,8 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
         $actions = $this->getActions($posting);
         $posting_ui = $posting_ui->withActions($actions);
+        $attachments = $this->getAttachments($posting);
+        $posting_ui = $posting_ui->withAttachments($attachments);
 
         return $posting_ui;
     }
@@ -329,6 +341,9 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $posting->getTitle(),
             $posting->getDescription()
         );
+
+        $attachments = $this->getAttachments($posting);
+        $posting_ui = $posting_ui->withAttachments($attachments);
 
         return $posting_ui;
     }
@@ -381,6 +396,28 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->ctrl->clearParameterByClass(self::class, "post_id");
 
         return $actions;
+    }
+
+    /**
+     * @return UI\Component\Link\Link[]
+     */
+    protected function getAttachments(Posting $top_posting): array
+    {
+        $attachments = [];
+        foreach ($this->posting_manager->getAttachments($top_posting->getId(), $top_posting->getVersion()) as $att) {
+            if (($rid = $att->getRid()) &&
+                ($identification = $this->res_storage->manage()->find($rid))) {
+                $this->ctrl->setParameter($this, "rid", $rid);
+                $title = $this->res_storage->manage()->getCurrentRevision($identification)->getTitle();
+                $attachments[] = $this->ui_fac->link()->standard(
+                    $title,
+                    $this->ctrl->getLinkTarget($this, "downloadAttachment")
+                );
+                $this->ctrl->clearParameterByClass(self::class, "rid");
+            }
+        }
+
+        return $attachments;
     }
 
     public function getTitleLink(Posting $top_posting) : string
@@ -452,10 +489,21 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $description = $description->withValue($posting->getDescription());
         }
 
+        $files = $this->ui_fac->input()->field()->file(
+            new ilDebatePostingUploadHandlerGUI(),
+            $this->lng->txt("attachment"),
+            $this->lng->txt("attachment_info") // Info mit unterstützten Dateiformaten?
+        );
+        //->withAcceptedMimeTypes() // ILIAS whitelist oder manuell?
+
         $section_title = $edit ? $this->txt("update_posting") : $this->txt("add_posting");
+        $section_inputs = ["title" => $title,
+                           "description" => $description];
+        if (!$edit) {
+            $section_inputs["files"] = $files;
+        }
         $section = $this->ui_fac->input()->field()->section(
-            ["title" => $title,
-             "description" => $description],
+            $section_inputs,
             $section_title
         );
 
@@ -513,7 +561,8 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
                 } else {
                     $this->posting_manager->createTopPosting(
                         $props["title"],
-                        $props["description"]
+                        $props["description"],
+                        $props["files"][0] ?? ""
                     );
                     $this->tpl->setOnScreenMessage("success", $this->txt("posting_created"), true);
                 }
@@ -570,5 +619,14 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         }
         $pm = $this->domain->posting($this->object->getId());
         $pm->exportContributor($this->gui->request()->getContributor());
+    }
+
+    protected function downloadAttachment(): void
+    {
+        $rid = $this->gui->request()->getResourceID();
+        if ($identification = $this->res_storage->manage()->find($rid)) {
+            $this->res_storage->consume()->download($identification)->run();
+        }
+
     }
 }

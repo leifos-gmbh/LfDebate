@@ -49,6 +49,7 @@ class CommentUI extends PostingUI
         $this->handleGlyph();
         $this->fillHTML($tpl);
         $this->maybeSetActions($tpl);
+        $this->maybeSetAttachments($tpl);
         $this->maybeSetSubComments($tpl);
 
         return $tpl->get();

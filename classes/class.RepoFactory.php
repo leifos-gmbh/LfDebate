@@ -47,4 +47,12 @@ class RepoFactory
             $this->db
         );
     }
+
+    public function attachment(): AttachmentDBRepo
+    {
+        return new AttachmentDBRepo(
+            $this->data,
+            $this->db
+        );
+    }
 }
