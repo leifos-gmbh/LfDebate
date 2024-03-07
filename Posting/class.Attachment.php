@@ -38,23 +38,17 @@ class Attachment
      * @var int
      */
     protected $create_version = 0;
-    /**
-     * @var int
-     */
-    protected $delete_version = 0;
 
     public function __construct(
         int $id,
         int $posting_id,
         string $rid,
-        int $create_version,
-        int $delete_version
+        int $create_version
     ) {
         $this->id = $id;
         $this->posting_id = $posting_id;
         $this->rid = $rid;
         $this->create_version = $create_version;
-        $this->delete_version = $delete_version;
     }
 
     public function getId(): int
@@ -75,10 +69,5 @@ class Attachment
     public function getCreateVersion(): int
     {
         return $this->create_version;
-    }
-
-    public function getDeleteVersion(): int
-    {
-        return $this->delete_version;
     }
 }

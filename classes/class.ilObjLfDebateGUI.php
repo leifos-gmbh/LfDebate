@@ -492,8 +492,8 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
         $files = $this->ui_fac->input()->field()->file(
             new ilDebatePostingUploadHandlerGUI(),
-            $this->lng->txt("attachment"),
-            $this->lng->txt("attachment_info") // Info mit unterstützten Dateiformaten?
+            $this->lng->txt("attachments")
+            //$this->lng->txt("attachment_info") // Unterstützte Dateiformate:
         );
         //->withAcceptedMimeTypes() // ILIAS whitelist oder manuell?
         if ($edit) {

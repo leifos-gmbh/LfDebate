@@ -53,16 +53,14 @@ class DataFactory
         int $id,
         int $posting_id,
         string $rid,
-        int $create_version,
-        int $delete_version
+        int $create_version
     ): Attachment
     {
         return new Attachment(
             $id,
             $posting_id,
             $rid,
-            $create_version,
-            $delete_version
+            $create_version
         );
     }
 }

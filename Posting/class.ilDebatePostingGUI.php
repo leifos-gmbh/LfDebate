@@ -458,8 +458,8 @@ class ilDebatePostingGUI
 
         $files = $this->ui_fac->input()->field()->file(
             new ilDebatePostingUploadHandlerGUI(),
-            $this->lng->txt("attachment"),
-            $this->lng->txt("attachment_info") // Info mit unterstützten Dateiformaten?
+            $this->lng->txt("attachments")
+            //$this->lng->txt("attachment_info") // Unterstützte Dateiformate:
         );
         //->withAcceptedMimeTypes() // ILIAS whitelist oder manuell?
         if ($edit) {
@@ -558,7 +558,7 @@ class ilDebatePostingGUI
         $this->ctrl->redirect($this, "showPosting");
     }
 
-    protected function downloadAttachment(): void // verschieben nach ilObjLfDebateGUI?
+    protected function downloadAttachment(): void
     {
         $rid = $this->gui->request()->getResourceID();
         if ($identification = $this->resource_storage->manage()->find($rid)) {

@@ -46,8 +46,7 @@ class AttachmentDBRepo
             (int) $rec["id"],
             (int) $rec["posting_id"],
             (string) $rec["rid"],
-            (int) $rec["create_version"],
-            (int) $rec["delete_version"],
+            (int) $rec["create_version"]
         );
     }
 

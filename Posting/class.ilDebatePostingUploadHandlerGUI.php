@@ -76,6 +76,8 @@ class ilDebatePostingUploadHandlerGUI extends AbstractCtrlAwareUploadHandler
 
     protected function getRemoveResult(string $identifier): HandlerResultInterface
     {
+        // files must not be removed from resource storage, because we need them for versioning of Postings
+        /*
         $id = $this->storage->manage()->find($identifier);
         if ($id !== null) {
             $this->storage->manage()->remove($id, $this->stakeholder);
@@ -84,6 +86,8 @@ class ilDebatePostingUploadHandlerGUI extends AbstractCtrlAwareUploadHandler
         } else {
             return new BasicHandlerResult($this->getFileIdentifierParameterName(), HandlerResultInterface::STATUS_FAILED, $identifier, 'file not found');
         }
+        */
+        return new BasicHandlerResult($this->getFileIdentifierParameterName(), HandlerResultInterface::STATUS_OK, $identifier, 'file kept for versioning of postings');
     }
 
     public function getInfoResult(string $identifier): FileInfoResult

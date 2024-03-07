@@ -174,3 +174,9 @@ if(!$ilDB->tableExists("xdbt_posting_att")) {
     $ilDB->createSequence("xdbt_posting_att");
 }
 ?>
+<#11>
+<?php
+if ($ilDB->tableColumnExists("xdbt_posting_att", "delete_version")) {
+    $ilDB->dropTableColumn("xdbt_posting_att", "delete_version");
+}
+?>
