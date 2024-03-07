@@ -73,7 +73,7 @@ class ilDebatePostingGUI
     /**
      * @var ResourceStorage
      */
-    protected $res_storage;
+    protected $resource_storage;
     /**
      * @var PostingManager
      */
@@ -116,7 +116,7 @@ class ilDebatePostingGUI
         $this->ui_fac = $DIC->ui()->factory();
         $this->ui_ren = $DIC->ui()->renderer();
         $this->request = $DIC->http()->request();
-        $this->res_storage = $DIC->resourceStorage();
+        $this->resource_storage = $DIC->resourceStorage();
 
         $this->dbt_object = $dbt_obj;
         $this->dbt_plugin = $dbt_plugin;
@@ -382,9 +382,9 @@ class ilDebatePostingGUI
         $attachments = [];
         foreach ($this->posting_manager->getAttachments($posting->getId(), $posting->getVersion()) as $att) {
             if (($rid = $att->getRid()) &&
-                ($identification = $this->res_storage->manage()->find($rid))) {
+                ($identification = $this->resource_storage->manage()->find($rid))) {
                 $this->ctrl->setParameter($this, "rid", $rid);
-                $title = $this->res_storage->manage()->getCurrentRevision($identification)->getTitle();
+                $title = $this->resource_storage->manage()->getCurrentRevision($identification)->getTitle();
                 $attachments[] = $this->ui_fac->link()->standard(
                     $title,
                     $this->ctrl->getLinkTarget($this, "downloadAttachment")
@@ -462,13 +462,21 @@ class ilDebatePostingGUI
             $this->lng->txt("attachment_info") // Info mit unterstützten Dateiformaten?
         );
         //->withAcceptedMimeTypes() // ILIAS whitelist oder manuell?
+        if ($edit) {
+            $attachments = $this->posting_manager->getAttachments($comment->getId());
+            $rids = [];
+            foreach ($attachments as $attachment) {
+                $rids[] = $attachment->getRid();
+            }
+            $files = $files->withValue($rids);
+        }
 
         $section_title = $edit ? $this->dbt_plugin->txt("update_comment") : $this->dbt_plugin->txt("add_comment");
         $section_inputs = ["title" => $title,
-                           "description" => $description];
+                           "description" => $description,
+                           "files" => $files];
         if (!$edit) {
             $section_inputs["type"] = $type;
-            $section_inputs["files"] = $files;
         }
         $section = $this->ui_fac->input()->field()->section(
             $section_inputs,
@@ -510,7 +518,8 @@ class ilDebatePostingGUI
                     $this->posting_manager->editPosting(
                         $comment,
                         $props["title"],
-                        $props["description"]
+                        $props["description"],
+                        $props["files"] ?? []
                     );
                     $this->tpl->setOnScreenMessage("success", $this->dbt_plugin->txt("comment_updated"), true);
                 } else {
@@ -520,7 +529,7 @@ class ilDebatePostingGUI
                         $props["title"],
                         $props["description"],
                         $props["type"],
-                        $props["files"][0] ?? ""
+                        $props["files"] ?? []
                     );
                     $this->tpl->setOnScreenMessage("success", $this->dbt_plugin->txt("comment_created"), true);
                 }
@@ -549,11 +558,11 @@ class ilDebatePostingGUI
         $this->ctrl->redirect($this, "showPosting");
     }
 
-    protected function downloadAttachment(): void
+    protected function downloadAttachment(): void // verschieben nach ilObjLfDebateGUI?
     {
         $rid = $this->gui->request()->getResourceID();
-        if ($identification = $this->res_storage->manage()->find($rid)) {
-            $this->res_storage->consume()->download($identification)->run();
+        if ($identification = $this->resource_storage->manage()->find($rid)) {
+            $this->resource_storage->consume()->download($identification)->run();
         }
     }
 }

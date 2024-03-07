@@ -149,10 +149,13 @@ class PostingManager
         return $postings;
     }
 
+    /**
+     * @param string[]  $file_ids
+     */
     public function createTopPosting(
         string $title,
         string $description,
-        string $file_id
+        array $file_ids
     ): void {
         $user_id = $this->domain->user()->getId();
         $posting_id = $this->repo->posting()->create(
@@ -163,10 +166,12 @@ class PostingManager
             \ilUtil::now()
         );
 
-        $this->repo->attachment()->create(
-            $posting_id,
-            $file_id
-        );
+        foreach ($file_ids as $file_id) {
+            $this->repo->attachment()->create(
+                $posting_id,
+                $file_id
+            );
+        }
 
         $this->repo->posting()->addToTree(
             $this->obj_id,
@@ -174,12 +179,15 @@ class PostingManager
         );
     }
 
+    /**
+     * @param string[]  $file_ids
+     */
     public function createCommentPosting(
         int $parent_id,
         string $title,
         string $description,
         string $type,
-        string $file_id
+        array $file_ids
     ): void {
         $user_id = $this->domain->user()->getId();
         $posting_id = $this->repo->posting()->create(
@@ -190,10 +198,12 @@ class PostingManager
             \ilUtil::now()
         );
 
-        $this->repo->attachment()->create(
-            $posting_id,
-            $file_id
-        );
+        foreach ($file_ids as $file_id) {
+            $this->repo->attachment()->create(
+                $posting_id,
+                $file_id
+            );
+        }
 
         $this->repo->posting()->addToTree(
             $this->obj_id,
@@ -202,10 +212,14 @@ class PostingManager
         );
     }
 
+    /**
+     * @param string[]   $new_file_ids
+     */
     public function editPosting(
         Posting $posting,
         string $new_title,
-        string $new_description
+        string $new_description,
+        array $new_file_ids
     ): void {
         $this->repo->posting()->createNewVersion(
             $posting->getId(),
@@ -221,6 +235,13 @@ class PostingManager
             $posting,
             $max_post_version
         );
+
+        foreach ($new_file_ids as $new_file_id) {
+            $this->repo->attachment()->create(
+                $posting->getId(),
+                $new_file_id
+            );
+        }
     }
 
     protected function getMaxVersionOfPosting(int $id): int
@@ -315,6 +336,11 @@ class PostingManager
         }
 
         return $text;
+    }
+
+    public function getAttachment(int $id): Attachment
+    {
+        return $this->repo->attachment()->getAttachment($id);
     }
 
     /**

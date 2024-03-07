@@ -75,7 +75,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
     /**
      * @var ResourceStorage
      */
-    protected $res_storage;
+    protected $resource_storage;
     /**
      * @var UI\Component\Component[]
      */
@@ -91,7 +91,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->ui_ren = $DIC->ui()->renderer();
         $this->request = $DIC->http()->request();
         $this->main_tpl = $DIC->ui()->mainTemplate();
-        $this->res_storage = $DIC->resourceStorage();
+        $this->resource_storage = $DIC->resourceStorage();
 
         /** @var ilLfDebatePlugin $plugin */
         $plugin = $this->plugin;
@@ -268,10 +268,11 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
     protected function showAllPostings(): void
     {
         if ($this->access_wrapper->canAddPostings()) {
-            $add_post_button = ilLinkButton::getInstance();
-            $add_post_button->setCaption($this->txt("add_posting"), false);
-            $add_post_button->setUrl($this->ctrl->getLinkTarget($this, "addPosting"));
-            $this->toolbar->addButtonInstance($add_post_button);
+            $add_post_button = $this->ui_fac->button()->standard(
+                $this->txt("add_posting"),
+                $this->ctrl->getLinkTarget($this, "addPosting")
+            );
+            $this->toolbar->addComponent($add_post_button);
         }
 
         if ($this->access_wrapper->canExportPostings()) {
@@ -406,9 +407,9 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $attachments = [];
         foreach ($this->posting_manager->getAttachments($top_posting->getId(), $top_posting->getVersion()) as $att) {
             if (($rid = $att->getRid()) &&
-                ($identification = $this->res_storage->manage()->find($rid))) {
+                ($identification = $this->resource_storage->manage()->find($rid))) {
                 $this->ctrl->setParameter($this, "rid", $rid);
-                $title = $this->res_storage->manage()->getCurrentRevision($identification)->getTitle();
+                $title = $this->resource_storage->manage()->getCurrentRevision($identification)->getTitle();
                 $attachments[] = $this->ui_fac->link()->standard(
                     $title,
                     $this->ctrl->getLinkTarget($this, "downloadAttachment")
@@ -495,13 +496,19 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $this->lng->txt("attachment_info") // Info mit unterstützten Dateiformaten?
         );
         //->withAcceptedMimeTypes() // ILIAS whitelist oder manuell?
+        if ($edit) {
+            $attachments = $this->posting_manager->getAttachments($posting->getId());
+            $rids = [];
+            foreach ($attachments as $attachment) {
+                $rids[] = $attachment->getRid();
+            }
+            $files = $files->withValue($rids);
+        }
 
         $section_title = $edit ? $this->txt("update_posting") : $this->txt("add_posting");
         $section_inputs = ["title" => $title,
-                           "description" => $description];
-        if (!$edit) {
-            $section_inputs["files"] = $files;
-        }
+                           "description" => $description,
+                           "files" => $files];
         $section = $this->ui_fac->input()->field()->section(
             $section_inputs,
             $section_title
@@ -555,14 +562,15 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
                     $this->posting_manager->editPosting(
                         $posting,
                         $props["title"],
-                        $props["description"]
+                        $props["description"],
+                        $props["files"] ?? []
                     );
                     $this->tpl->setOnScreenMessage("success", $this->txt("posting_updated"), true);
                 } else {
                     $this->posting_manager->createTopPosting(
                         $props["title"],
                         $props["description"],
-                        $props["files"][0] ?? ""
+                        $props["files"] ?? []
                     );
                     $this->tpl->setOnScreenMessage("success", $this->txt("posting_created"), true);
                 }
@@ -624,8 +632,8 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
     protected function downloadAttachment(): void
     {
         $rid = $this->gui->request()->getResourceID();
-        if ($identification = $this->res_storage->manage()->find($rid)) {
-            $this->res_storage->consume()->download($identification)->run();
+        if ($identification = $this->resource_storage->manage()->find($rid)) {
+            $this->resource_storage->consume()->download($identification)->run();
         }
 
     }

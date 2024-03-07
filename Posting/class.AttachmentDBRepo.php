@@ -112,17 +112,6 @@ class AttachmentDBRepo
                 "create_version" => ["integer", 0],
             ]
         );
-
-        $atts = $this->getAttachmentsForPosting($posting->getId(), $max_post_version);
-        foreach ($atts as $att) {
-            $id = $this->db->nextId("xdbt_posting_att");
-            $this->db->insert("xdbt_posting_att", [
-                "id" => ["integer", $id],
-                "posting_id" => ["integer", $att->getPostingId()],
-                "rid" => ["text", $att->getRid()],
-                "create_version" => ["integer", 0]
-            ]);
-        }
     }
 
     public function delete(int $id): void
