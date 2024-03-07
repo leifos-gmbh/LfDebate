@@ -40,7 +40,7 @@ class DebateUIRenderer extends DefaultRenderer
 
     protected function getRendererFor(Component $component)
     {
-        if ($component instanceof Input) {
+        if ($component instanceof Input && empty($this->getContexts())) {
             $renderer = new DebateInputRenderer(
                 $this->dic["ui.factory"],
                 $this->dic["ui.template_factory"],
