@@ -27,6 +27,7 @@ use ILIAS\FileUpload\Handler\FileInfoResult;
 use ILIAS\FileUpload\Handler\HandlerResult as HandlerResultInterface;
 use ILIAS\ResourceStorage\Services as ResourceStorage;
 use Leifos\Debate\PostingStakeHolder;
+use Leifos\Debate\ValidExtensionsPreProcessor;
 
 /**
  * @author Thomas Famula <famula@leifos.de>
@@ -54,6 +55,7 @@ class ilDebatePostingUploadHandlerGUI extends AbstractCtrlAwareUploadHandler
 
     protected function getUploadResult(): HandlerResultInterface
     {
+        $this->upload->register(new ValidExtensionsPreProcessor(ilFileUtils::getValidExtensions()));
         $this->upload->process();
         /**
          * @var $result UploadResult

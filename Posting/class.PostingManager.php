@@ -20,6 +20,8 @@ declare(strict_types=1);
 
 namespace Leifos\Debate;
 
+use ILIAS\ResourceStorage;
+
 class PostingManager
 {
     /**
@@ -31,6 +33,10 @@ class PostingManager
      */
     protected $repo;
     /**
+     * @var ResourceStorage\Services
+     */
+    protected $resource_storage;
+    /**
      * @var DomainFactory
      */
     protected $domain;
@@ -39,18 +45,25 @@ class PostingManager
      * @var int repository object id
      */
     protected $obj_id;
+    /**
+     * @var PostingStakeHolder
+     */
+    protected $stakeholder;
 
     public function __construct(
         DataFactory $data,
         RepoFactory $repo,
+        ResourceStorage\Services $resource_storage,
         DomainFactory $domain,
         int $obj_id
     )
     {
         $this->data = $data;
         $this->repo = $repo;
+        $this->resource_storage = $resource_storage;
         $this->domain = $domain;
         $this->obj_id = $obj_id;
+        $this->stakeholder = new PostingStakeHolder();
     }
 
     /**
@@ -249,19 +262,35 @@ class PostingManager
         return $this->repo->posting()->getMaxVersion($id);
     }
 
+    public function getAttachment(int $id): Attachment
+    {
+        return $this->repo->attachment()->getAttachment($id);
+    }
+
+    /**
+     * @return Attachment[]
+     */
+    public function getAttachmentsForPosting(int $posting_id, int $version = 0): array
+    {
+        return $this->repo->attachment()->getAttachmentsForPosting($posting_id, $version);
+    }
+
     public function deleteTopPosting(int $id): void
     {
         foreach ($this->getCommentsOfPosting($id) as $comment) {
             foreach ($this->getSubCommentsOfComment($comment->getId()) as $sub_comment) {
-                $this->repo->posting()->delete($sub_comment->getId());
+                $this->deleteAttachmentFilesForPosting($sub_comment->getId());
                 $this->repo->attachment()->deleteForPosting($sub_comment->getId());
+                $this->repo->posting()->delete($sub_comment->getId());
             }
-            $this->repo->posting()->delete($comment->getId());
+            $this->deleteAttachmentFilesForPosting($comment->getId());
             $this->repo->attachment()->deleteForPosting($comment->getId());
+            $this->repo->posting()->delete($comment->getId());
             $this->repo->posting()->removeChildsFromTree($comment->getId());
         }
-        $this->repo->posting()->delete($id);
+        $this->deleteAttachmentFilesForPosting($id);
         $this->repo->attachment()->deleteForPosting($id);
+        $this->repo->posting()->delete($id);
         $this->repo->posting()->removeChildsFromTree($id);
         $this->repo->posting()->removeFromTree($id);
     }
@@ -269,20 +298,43 @@ class PostingManager
     public function deleteComment(int $id): void
     {
         foreach ($this->getSubCommentsOfComment($id) as $sub_comment) {
-            $this->repo->posting()->delete($sub_comment->getId());
+            $this->deleteAttachmentFilesForPosting($sub_comment->getId());
             $this->repo->attachment()->deleteForPosting($sub_comment->getId());
+            $this->repo->posting()->delete($sub_comment->getId());
         }
-        $this->repo->posting()->delete($id);
+        $this->deleteAttachmentFilesForPosting($id);
         $this->repo->attachment()->deleteForPosting($id);
+        $this->repo->posting()->delete($id);
         $this->repo->posting()->removeChildsFromTree($id);
         $this->repo->posting()->removeFromTree($id);
     }
 
     public function deleteAll(): void
     {
-        $this->repo->posting()->deleteAll($this->obj_id);
+        $this->deleteAttachmentFilesForDebate();
         $this->repo->attachment()->deleteAll($this->obj_id);
+        $this->repo->posting()->deleteAll($this->obj_id);
         $this->repo->posting()->removeAllFromTree($this->obj_id);
+    }
+
+    protected function deleteAttachmentFilesForPosting(int $posting_id): void
+    {
+        foreach ($this->repo->attachment()->getAttachmentsForAllPostingVersions($posting_id) as $att) {
+            $id = $this->resource_storage->manage()->find($att->getRid());
+            if ($id !== null) {
+                $this->resource_storage->manage()->remove($id, $this->stakeholder);
+            }
+        }
+    }
+
+    protected function deleteAttachmentFilesForDebate(): void
+    {
+        foreach ($this->repo->attachment()->getAttachmentsForDebate($this->obj_id) as $att) {
+            $id = $this->resource_storage->manage()->find($att->getRid());
+            if ($id !== null) {
+                $this->resource_storage->manage()->remove($id, $this->stakeholder);
+            }
+        }
     }
 
     public function getContributors(): array
@@ -315,7 +367,7 @@ class PostingManager
         );
     }
 
-    public function getContributionsOfUserAsText(int $user_id) : string
+    protected function getContributionsOfUserAsText(int $user_id) : string
     {
         $post_repo = $this->repo->posting();
 
@@ -336,18 +388,5 @@ class PostingManager
         }
 
         return $text;
-    }
-
-    public function getAttachment(int $id): Attachment
-    {
-        return $this->repo->attachment()->getAttachment($id);
-    }
-
-    /**
-     * @return Attachment[]
-     */
-    public function getAttachments(int $posting_id, int $version = 0): array
-    {
-        return $this->repo->attachment()->getAttachmentsForPosting($posting_id, $version);
     }
 }

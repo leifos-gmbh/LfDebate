@@ -67,6 +67,7 @@ class DomainFactory
         return new PostingManager(
             $this->data,
             $this->repo,
+            $this->resourceStorage(),
             $this,
             $obj_id
         );

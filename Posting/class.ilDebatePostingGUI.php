@@ -380,7 +380,7 @@ class ilDebatePostingGUI
     protected function getAttachments(Posting $posting): array
     {
         $attachments = [];
-        foreach ($this->posting_manager->getAttachments($posting->getId(), $posting->getVersion()) as $att) {
+        foreach ($this->posting_manager->getAttachmentsForPosting($posting->getId(), $posting->getVersion()) as $att) {
             if (($rid = $att->getRid()) &&
                 ($identification = $this->resource_storage->manage()->find($rid))) {
                 $this->ctrl->setParameter($this, "rid", $rid);
@@ -459,11 +459,9 @@ class ilDebatePostingGUI
         $files = $this->ui_fac->input()->field()->file(
             new ilDebatePostingUploadHandlerGUI(),
             $this->lng->txt("attachments")
-            //$this->lng->txt("attachment_info") // Unterstützte Dateiformate:
         );
-        //->withAcceptedMimeTypes() // ILIAS whitelist oder manuell?
         if ($edit) {
-            $attachments = $this->posting_manager->getAttachments($comment->getId());
+            $attachments = $this->posting_manager->getAttachmentsForPosting($comment->getId());
             $rids = [];
             foreach ($attachments as $attachment) {
                 $rids[] = $attachment->getRid();

@@ -66,7 +66,6 @@ class AttachmentDBRepo
     }
 
     /**
-     * @param int $posting_id
      * @return Attachment[]
      */
     public function getAttachmentsForPosting(int $posting_id, int $version = 0): array
@@ -75,6 +74,44 @@ class AttachmentDBRepo
             " WHERE posting_id = %s AND create_version = %s",
             ["integer", "integer"],
             [$posting_id, $version]
+        );
+
+        $atts = [];
+        while ($rec = $this->db->fetchAssoc($set)) {
+            $atts[] = $this->getFromRecord($rec);
+        }
+
+        return $atts;
+    }
+
+    /**
+     * @return Attachment[]
+     */
+    public function getAttachmentsForAllPostingVersions(int $posting_id): array
+    {
+        $set = $this->db->queryF("SELECT * FROM xdbt_posting_att " .
+            " WHERE posting_id = %s",
+            ["integer"],
+            [$posting_id]
+        );
+
+        $atts = [];
+        while ($rec = $this->db->fetchAssoc($set)) {
+            $atts[] = $this->getFromRecord($rec);
+        }
+
+        return $atts;
+    }
+
+    /**
+     * @return Attachment[]
+     */
+    public function getAttachmentsForDebate(int $obj_id): array
+    {
+        $set = $this->db->queryF("SELECT * FROM xdbt_posting_att " .
+            " WHERE posting_id IN (SELECT child FROM xdbt_post_tree WHERE xdbt_obj_id = %s)",
+            ["integer"],
+            [$obj_id]
         );
 
         $atts = [];
