@@ -139,6 +139,14 @@ class GUIFactory
         );
     }
 
+    public function profileReminder(\ilLfDebatePlugin $plugin) : \DebateProfileReminderGUI {
+        return new \DebateProfileReminderGUI(
+            $this->domain_factory,
+            $this,
+            $plugin
+        );
+    }
+
     public function request() : GUIRequest
     {
         return new GUIRequest(

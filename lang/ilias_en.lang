@@ -29,6 +29,9 @@ posting_deleted#:#Posting has been deleted
 posting_overview#:#Postings
 posting_updated#:#Posting has been updated
 pro#:#Approval
+profile_reminder#:#Public Profile
+profile_reminder_long#:#You do not have a profile picture published currently. To make the debate more lively and personal, we ask you to upload and publish a personal picture.
+open_profile#:#Open Profile Settings
 pro_info#:#Select this category if you want to approve the posting or comment.
 question#:#Query
 question_info#:#Select this category if you have a query about the post or comment.

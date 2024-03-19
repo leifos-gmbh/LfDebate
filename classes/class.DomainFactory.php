@@ -26,6 +26,7 @@ use ILIAS\DI\LoggingServices;
 use ILIAS\Filesystem\Filesystems;
 use ILIAS\ResourceStorage;
 use ILIAS\Refinery;
+use Leifos\Debate\Profile\ProfileChecker;
 
 class DomainFactory
 {
@@ -71,6 +72,11 @@ class DomainFactory
             $this,
             $obj_id
         );
+    }
+
+    public function profileChecker() : ProfileChecker
+    {
+        return new ProfileChecker($this);
     }
 
     public function accessWrapper(int $ref_id): DebateAccess
@@ -166,4 +172,8 @@ class DomainFactory
         return $this->DIC->backgroundTasks();
     }
 
+    public function database() : \ilDBInterface
+    {
+        return $this->DIC->database();
+    }
 }

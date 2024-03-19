@@ -97,7 +97,6 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $plugin = $this->plugin;
         $this->gui = $plugin->gui();
         $this->domain = $plugin->domain();
-
         if ($this->object) {
             $this->posting_manager = $plugin->domain()->posting($this->object->getId());
             $this->access_wrapper = $plugin->domain()->accessWrapper((int) $this->object->getRefId());
@@ -288,7 +287,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
         $this->tabs->activateTab("content");
 
-        $html = "";
+        $html = $this->gui->profileReminder($this->plugin)->render();
         foreach ($this->posting_manager->getTopPostings($sorting->getCurrentSorting()) as $top_posting) {
             $posting_ui = $this->getPostingUI($top_posting);
             $html .= $posting_ui->render();
@@ -633,6 +632,13 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         if ($identification = $this->resource_storage->manage()->find($rid)) {
             $this->resource_storage->consume()->download($identification)->run();
         }
+    }
 
+    public function openProfileSettings() : void
+    {
+        $this->ctrl->redirectByClass([
+            ilDashboardGUI::class,
+            ilPersonalProfileGUI::class
+        ], "");
     }
 }
