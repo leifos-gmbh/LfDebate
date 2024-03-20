@@ -358,8 +358,8 @@ class PostingManager
     {
         $name = \ilObjUser::_lookupName($user_id);
 
-        echo "<pre>" . $this->getContributionsOfUserAsText($user_id) . "</pre>";
-        exit;
+        //echo "<pre>" . $this->getContributionsOfUserAsText($user_id) . "</pre>";
+        //exit;
 
         \ilUtil::deliverData(
             $this->getContributionsOfUserAsText($user_id),
