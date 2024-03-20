@@ -1,8 +1,10 @@
 add_comment#:#Kommentar hinzufügen
 add_posting#:#Beitrag hinzufügen
 cat_create_xdbt#:#Erstelle Debatte
+comment#:#Kommentar
 comment_created#:#Kommentar wurde hinzugefügt
 comment_deleted#:#Kommentar wurde gelöscht
+comment_of_to_posting#:#Kommentar von %1 auf Beitrag von %2
 comment_updated#:#Kommentar wurde aktualisiert
 confirm_deletion#:#Löschen bestätigen
 confirm_deletion_comment#:#Möchten Sie den Kommentar wirklich löschen? Bitte beachten Sie, dass die Antworten zum Kommentar auch gelöscht werden.
@@ -25,8 +27,10 @@ objs_xdbt#:#Debatten
 objs_xdbt_duplicate#:#Kopiere Debatten
 offline#:#Offline
 older_versions#:#Ältere Versionen
+posting#:#Beitrag
 posting_created#:#Beitrag wurde hinzugefügt
 posting_deleted#:#Beitrag wurde gelöscht
+posting_of#:#Beitrag von %1
 posting_overview#:#Beitragsübersicht
 posting_updated#:#Beitrag wurde aktualisiert
 pro#:#Zustimmung
@@ -36,6 +40,7 @@ open_profile#:#Profileinstellungen öffnen
 pro_info#:#Wählen Sie diese Kategorie, wenn Sie dem Beitrag oder Kommentar zustimmen möchten.
 question#:#Rückfrage
 question_info#:#Wählen Sie diese Kategorie, wenn Sie eine Rückfrage zu dem Beitrag oder Kommentar haben.
+reference#:#Bezug
 root_create_xdbt#:#Erstelle Debatte
 saved_successfully#:#Änderungen wurden gespeichert
 show_older_versions#:#Ältere Versionen anzeigen

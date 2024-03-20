@@ -358,8 +358,8 @@ class PostingManager
     {
         $name = \ilObjUser::_lookupName($user_id);
 
-        //echo nl2br($this->getContributionsOfUserAsText($user_id));
-        //exit;
+        echo "<pre>" . $this->getContributionsOfUserAsText($user_id) . "</pre>";
+        exit;
 
         \ilUtil::deliverData(
             $this->getContributionsOfUserAsText($user_id),
@@ -369,24 +369,75 @@ class PostingManager
 
     protected function getContributionsOfUserAsText(int $user_id) : string
     {
+        $plugin = $this->domain->plugin();
         $post_repo = $this->repo->posting();
 
         $name = \ilObjUser::_lookupName($user_id);
-        $text = "Name: " . $name["lastname"] . ", " . $name["firstname"] . "\n\n";
+        $name_line = $name["lastname"] . ", " . $name["firstname"];
+        $text = "";
 
         /** @var Posting $p */
         foreach ($post_repo->getContributionsOfUser($this->obj_id, $user_id) as $p) {
+
+            $pad = "";
+            $reference = "";
+            $posting_type = $plugin->txt("posting");
+            if ($p->getParent() > 0) {
+                $pad = str_pad(" ", 4);
+                $posting_type = $plugin->txt("comment")." (1)";
+                $parent = $this->repo->posting()->getPosting($this->obj_id, $p->getParent(), 0);
+                $parent_name = \ilObjUser::_lookupName($parent->getUserId());
+                $parent_name = $parent_name["lastname"] . ", " . $parent_name["firstname"];
+                $reference = $plugin->txt("reference"). ": " . str_replace("%1", $parent_name, $plugin->txt("posting_of"));
+                if ($parent->getParent() > 0) {
+                    $pad = str_pad(" ", 8);
+                    $posting_type = $plugin->txt("comment")." (2)";
+                    $grand_parent = $this->repo->posting()->getPosting($this->obj_id, $parent->getParent(), 0);
+                    $grand_parent_name = \ilObjUser::_lookupName($grand_parent->getUserId());
+                    $grand_parent_name = $grand_parent_name["lastname"] . ", " . $grand_parent_name["firstname"];
+                    $reference = $plugin->txt("reference"). ": " .
+                        str_replace("%1", $parent_name,
+                            str_replace("%2", $grand_parent_name, $plugin->txt("comment_of_to_posting")));
+                }
+                $reference.= "\n";
+            }
+
             $desc = str_replace("\n", " ", $p->getDescription());
             $desc = str_replace("\r", " ", $desc);
             $desc = str_replace("  ", " ", $desc);
             $desc = str_replace("  ", " ", $desc);
-            $text .= "Datum: " . $p->getCreateDate() . "\n";
-            $text .= "Titel: " . $p->getTitle() . "\n";
-            $text .= "Reaktion: " . $p->getType() . "\n";
-            $text .= $desc . "\n";
+            $desc = str_replace("</li>", "</li>   ", $desc);
+            $desc = str_replace("<li>", "<li>* ", $desc);
+            $desc = strip_tags($desc);
+            $text .= $pad.$posting_type . ": " . $name_line;
+            $dt = new \ilDateTime($p->getCreateDate(), IL_CAL_DATETIME);
+            \ilDatePresentation::setUseRelativeDates(false);
+            $dt = \ilDatePresentation::formatDate($dt);
+            $text .= " [" . $dt . "]\n";
+            if ($reference !== "") {
+                $text .= $pad.$reference;
+            }
+            $text .= $pad."Titel: " . $p->getTitle() . "\n";
+            if ($pad !== "") {
+                $text .= $pad."Reaktion: " . $this->getTypeTitle($p->getType()) . "\n";
+            }
+            $text .= $pad.$desc . "\n";
             $text .= "\n";
         }
 
         return $text;
+    }
+
+    protected function getTypeTitle(string $type) : string
+    {
+        $plugin = $this->domain->plugin();
+        switch ($type) {
+            case CommentUI::TYPE_INITIAL: return $plugin->txt("neutral");
+            case CommentUI::TYPE_PRO: return $plugin->txt("pro");
+            case CommentUI::TYPE_EXCLAMATION: return $plugin->txt("exclamation");
+            case CommentUI::TYPE_CONTRA: return $plugin->txt("contra");
+            case CommentUI::TYPE_QUESTION: return $plugin->txt("question");
+        }
+        return "";
     }
 }

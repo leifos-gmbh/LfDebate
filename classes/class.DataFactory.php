@@ -34,7 +34,8 @@ class DataFactory
         string $description,
         string $type,
         string $create_date,
-        int $version = 0
+        int $version = 0,
+        int $parent = 0
     ): Posting
     {
         return new Posting(
@@ -45,7 +46,8 @@ class DataFactory
             $description,
             $type,
             $create_date,
-            $version
+            $version,
+            $parent
         );
     }
 

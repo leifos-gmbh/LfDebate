@@ -25,6 +25,10 @@ class Posting
     /**
      * @var int
      */
+    protected $parent;
+    /**
+     * @var int
+     */
     protected $obj_id;
     /**
      * @var int
@@ -63,7 +67,8 @@ class Posting
         string $description,
         string $type,
         string $create_date,
-        int $version
+        int $version,
+        int $parent = 0
     ) {
         $this->obj_id = $obj_id;
         $this->id = $id;
@@ -73,6 +78,7 @@ class Posting
         $this->type = $type;
         $this->create_date = $create_date;
         $this->version = $version;
+        $this->parent = $parent;
     }
 
     public function getObjId(): int
@@ -113,5 +119,10 @@ class Posting
     public function getVersion(): int
     {
         return $this->version;
+    }
+
+    public function getParent(): int
+    {
+        return $this->parent;
     }
 }

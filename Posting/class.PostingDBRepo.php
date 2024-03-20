@@ -51,6 +51,7 @@ class PostingDBRepo
             (string) $rec["type"],
             (string) $rec["create_date"],
             (int) $rec["version"],
+            (int) $rec["parent"] ?? 0
         );
     }
 
@@ -92,8 +93,8 @@ class PostingDBRepo
 
     public function getPosting(int $obj_id, int $id, int $version): ?Posting
     {
-        $set = $this->db->queryF("SELECT * FROM xdbt_posting " .
-            " WHERE id = %s AND version = %s",
+        $set = $this->db->queryF("SELECT * FROM xdbt_posting LEFT JOIN  xdbt_post_tree t ON (t.child = xdbt_posting.id) " .
+            " WHERE id = %s AND version = %s ",
             ["integer", "integer"],
             [$id, $version]
         );

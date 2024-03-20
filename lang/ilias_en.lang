@@ -1,8 +1,10 @@
 add_comment#:#Add Comment
 add_posting#:#Add Posting
 cat_create_xdbt#:#Create Debate
+comment#:#Comment
 comment_created#:#Comment has been added
 comment_deleted#:#Comment has bee deleted
+comment_of_to_posting#:#Comment by %1 as reply to posting by %2
 comment_updated#:#Comment has been updated
 confirm_deletion#:#Confirm Deletion
 confirm_deletion_comment#:#Do you really want to delete the comment? Please note that the replies to the comment will also be deleted.
@@ -25,8 +27,10 @@ objs_xdbt#:#Debates
 objs_xdbt_duplicate#:#Copy Debate
 offline#:#Offline
 older_versions#:#Older Versions
+posting#:#Posting
 posting_created#:#Posting has been added
 posting_deleted#:#Posting has been deleted
+posting_of#:#Posting of %1
 posting_overview#:#Postings
 posting_updated#:#Posting has been updated
 pro#:#Approval
@@ -36,6 +40,7 @@ open_profile#:#Open Profile Settings
 pro_info#:#Select this category if you want to approve the posting or comment.
 question#:#Query
 question_info#:#Select this category if you have a query about the post or comment.
+reference#:#Reference
 root_create_xdbt#:#Create Debate
 saved_successfully#:#Changes have been saved
 show_older_versions#:#Show Older Versions
