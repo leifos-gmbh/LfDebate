@@ -23,6 +23,7 @@ namespace Leifos\Debate;
 use ILIAS\DI\Container;
 use ILIAS\DI\HTTPServices;
 use ILIAS\UI\Component\Symbol\Avatar\Avatar;
+use Leifos\Debate\RTE\RTEHelper;
 
 class GUIFactory
 {
@@ -145,6 +146,11 @@ class GUIFactory
             $this,
             $plugin
         );
+    }
+
+    public function rteHelper() : RTEHelper
+    {
+        return new RTEHelper();
     }
 
     public function request() : GUIRequest

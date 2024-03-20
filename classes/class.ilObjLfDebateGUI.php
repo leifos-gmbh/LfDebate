@@ -41,6 +41,10 @@ require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/
 class ilObjLfDebateGUI extends ilObjectPluginGUI
 {
     /**
+     * @var \Leifos\Debate\RTE\RTEHelper
+     */
+    protected $rte;
+    /**
      * @var \Leifos\Debate\DomainFactory
      */
     protected $domain;
@@ -101,6 +105,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $this->posting_manager = $plugin->domain()->posting($this->object->getId());
             $this->access_wrapper = $plugin->domain()->accessWrapper((int) $this->object->getRefId());
         }
+        $this->rte = $this->gui->rteHelper();
     }
 
     protected function afterConstructor(): void
@@ -197,6 +202,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->addPermissionTab();
         //$this->activateTab();
     }
+
 
     protected function editProperties(): void
     {
@@ -451,6 +457,8 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
     protected function addOrEditPosting(bool $edit = false): void
     {
+        $this->rte->initRTE();
+
         $posting_id = $this->gui->request()->getPostingId();
         $posting_mode = $this->gui->request()->getPostingMode();
         $this->tabs->clearTargets();
@@ -554,19 +562,20 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $data = $form->getData();
             if (isset($data["props"]) && is_array($data["props"])) {
                 $props = $data["props"];
+
                 if ($edit) {
                     $posting = $this->posting_manager->getPosting($posting_id);
                     $this->posting_manager->editPosting(
                         $posting,
                         $props["title"],
-                        $props["description"],
+                        $this->rte->getTextInputFromPost(3),
                         $props["files"] ?? []
                     );
                     $this->tpl->setOnScreenMessage("success", $this->txt("posting_updated"), true);
                 } else {
                     $this->posting_manager->createTopPosting(
                         $props["title"],
-                        $props["description"],
+                        $this->rte->getTextInputFromPost(3),
                         $props["files"] ?? []
                     );
                     $this->tpl->setOnScreenMessage("success", $this->txt("posting_created"), true);

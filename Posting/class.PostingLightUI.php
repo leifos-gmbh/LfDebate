@@ -106,7 +106,7 @@ class PostingLightUI
         $tpl->setVariable("TYPE", $this->type);
         $tpl->setVariable("DATE", $this->create_date);
         $tpl->setVariable("TITLE", $this->title);
-        $tpl->setVariable("TEXT", nl2br($this->text));
+        $tpl->setVariable("TEXT", ($this->text));
     }
 
     protected function maybeSetAttachments(\ilTemplate $tpl): void

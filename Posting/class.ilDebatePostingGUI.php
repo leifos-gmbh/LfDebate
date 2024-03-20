@@ -39,6 +39,10 @@ use Psr\Http\Message\ServerRequestInterface;
 class ilDebatePostingGUI
 {
     /**
+     * @var \Leifos\Debate\RTE\RTEHelper
+     */
+    protected $rte;
+    /**
      * @var ilCtrl
      */
     protected $ctrl;
@@ -124,6 +128,7 @@ class ilDebatePostingGUI
         $this->posting_manager = $dbt_plugin->domain()->posting($dbt_obj->getId());
         $this->access_wrapper = $dbt_plugin->domain()->accessWrapper((int) $dbt_obj->getRefId());
         $this->posting = $this->posting_manager->getPosting($this->gui->request()->getPostingId());
+        $this->rte = $this->gui->rteHelper();
     }
 
     public function executeCommand(): void
@@ -418,6 +423,7 @@ class ilDebatePostingGUI
 
     protected function addOrEditComment(bool $edit = false): void
     {
+        $this->rte->initRTE();
         $this->tabs->clearTargets();
         $this->tabs->setBackTarget(
             $this->lng->txt("back"),
@@ -516,7 +522,7 @@ class ilDebatePostingGUI
                     $this->posting_manager->editPosting(
                         $comment,
                         $props["title"],
-                        $props["description"],
+                        $this->rte->getTextInputFromPost(3),
                         $props["files"] ?? []
                     );
                     $this->tpl->setOnScreenMessage("success", $this->dbt_plugin->txt("comment_updated"), true);
@@ -525,7 +531,7 @@ class ilDebatePostingGUI
                     $this->posting_manager->createCommentPosting(
                         $parent_id,
                         $props["title"],
-                        $props["description"],
+                        $this->rte->getTextInputFromPost(3),
                         $props["type"],
                         $props["files"] ?? []
                     );

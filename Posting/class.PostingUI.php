@@ -165,7 +165,7 @@ class PostingUI
             $tpl->parseCurrentBlock();
         }
         $tpl->setVariable("TITLE", $title);
-        $tpl->setVariable("TEXT", nl2br($this->text));
+        $tpl->setVariable("TEXT", ($this->text));
         if ($this->showpin) {
             $tpl->setVariable("PIN", $this->ui_ren->render(
                 $this->ui_fac->symbol()->glyph()->note()
