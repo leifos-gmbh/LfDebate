@@ -66,6 +66,10 @@ class RTEHelper
             "",
             ["strong", "em", "u", "ol", "li", "ul", "p", "span", "br"]
         );
+
+        global $DIC;
+        $mt = $DIC->ui()->mainTemplate();
+        $mt->addOnloadCode("setTimeout(() => {document.querySelector('.tox-tinymce--toolbar-sticky-off').style.height = '300px';}, 50); setTimeout(() => {document.querySelector('.tox-tinymce--toolbar-sticky-off').style.height = '300px';}, 200);");
     }
 
 }
