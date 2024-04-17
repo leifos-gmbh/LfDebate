@@ -20,53 +20,22 @@ declare(strict_types=1);
 
 namespace Leifos\Debate;
 
-use ILIAS\UI\Component\Link\Link;
+use ILIAS\UI\Factory;
+use ILIAS\UI\Renderer;
 
 class PostingLightUI
 {
-    /**
-     * @var \ilLfDebatePlugin
-     */
-    protected $plugin;
-    /**
-     * @var string
-     */
-    protected $type = "";
-    /**
-     * @var string
-     */
-    protected $create_date = "";
-    /**
-     * @var string
-     */
-    protected $title = "";
-    /**
-     * @var string
-     */
-    protected $text = "";
-    /**
-     * @var Link[]
-     */
-    protected $attachments = [];
-    /**
-     * @var \ILIAS\UI\Factory
-     */
-    protected $ui_fac;
-    /**
-     * @var \ILIAS\UI\Renderer
-     */
-    protected $ui_ren;
-    /**
-     * @var \ilTemplate
-     */
-    protected $main_tpl;
+    use PostingRender;
 
     public function __construct(
         \ilLfDebatePlugin $plugin,
         string $type,
         string $create_date,
         string $title,
-        string $text
+        string $text,
+        ?Factory $ui_fac = null,
+        ?Renderer $ui_ren = null,
+        ?\ilTemplate $main_tpl = null
     ) {
         global $DIC;
 
@@ -76,16 +45,9 @@ class PostingLightUI
         $this->title = $title;
         $this->text = $text;
 
-        $this->ui_fac = $DIC->ui()->factory();
-        $this->ui_ren = $DIC->ui()->renderer();
-        $this->main_tpl = $DIC->ui()->mainTemplate();
-    }
-
-    public function withAttachments(array $attachments): self
-    {
-        $clone = clone($this);
-        $clone->attachments = $attachments;
-        return $clone;
+        $this->ui_fac = ($ui_fac) ?: $DIC->ui()->factory();
+        $this->ui_ren = ($ui_ren) ?: $DIC->ui()->renderer();
+        $this->main_tpl = ($main_tpl) ?: $DIC->ui()->mainTemplate();
     }
 
     public function render(): string
@@ -107,15 +69,5 @@ class PostingLightUI
         $tpl->setVariable("DATE", $this->create_date);
         $tpl->setVariable("TITLE", $this->title);
         $tpl->setVariable("TEXT", ($this->text));
-    }
-
-    protected function maybeSetAttachments(\ilTemplate $tpl): void
-    {
-        if (count($this->attachments) > 0) {
-            $att_html = $this->ui_ren->render($this->ui_fac->listing()->unordered($this->attachments));
-            $tpl->setCurrentBlock("attachments");
-            $tpl->setVariable("ATTACHMENTS", $att_html);
-            $tpl->parseCurrentBlock();
-        }
     }
 }

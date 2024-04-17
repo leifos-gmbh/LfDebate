@@ -20,20 +20,7 @@ declare(strict_types=1);
 
 namespace Leifos\Debate;
 
-class CommentLightUI extends PostingLightUI
+trait CommentRender
 {
-    use CommentRender;
 
-    public function render(): string
-    {
-        $this->main_tpl->addCss(
-            "./Customizing/global/plugins/Services/Repository/RepositoryObject/LfDebate/css/debate.css"
-        );
-        $tpl = $this->plugin->getTemplate("tpl.debate_comment_light.html", true, true);
-
-        $this->fillHTML($tpl);
-        $this->maybeSetAttachments($tpl);
-
-        return $tpl->get();
-    }
 }

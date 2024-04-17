@@ -380,7 +380,7 @@ class ilDebatePostingGUI
     }
 
     /**
-     * @return UI\Component\Link\Link[]
+     * @return UI\Component\Link\Standard[]
      */
     protected function getAttachments(Posting $posting): array
     {

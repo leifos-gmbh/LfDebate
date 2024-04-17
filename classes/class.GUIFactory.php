@@ -23,6 +23,8 @@ namespace Leifos\Debate;
 use ILIAS\DI\Container;
 use ILIAS\DI\HTTPServices;
 use ILIAS\UI\Component\Symbol\Avatar\Avatar;
+use ILIAS\UI\Factory;
+use ILIAS\UI\Renderer;
 use Leifos\Debate\RTE\RTEHelper;
 
 class GUIFactory
@@ -70,7 +72,11 @@ class GUIFactory
         string $title,
         string $text,
         string $title_link = "",
-        bool $show_pin = false
+        bool $show_pin = false,
+        ?\ilLanguage $lng = null,
+        ?Factory $ui_fac = null,
+        ?Renderer $ui_ren = null,
+        ?\ilTemplate $main_tpl = null
     ): PostingUI {
         return new PostingUI(
             $plugin,
@@ -82,7 +88,11 @@ class GUIFactory
             $title,
             $text,
             $title_link,
-            $show_pin
+            $show_pin,
+            $lng,
+            $ui_fac,
+            $ui_ren,
+            $main_tpl
         );
     }
 
@@ -113,14 +123,20 @@ class GUIFactory
         string $type,
         string $create_date,
         string $title,
-        string $text
+        string $text,
+        ?Factory $ui_fac = null,
+        ?Renderer $ui_ren = null,
+        ?\ilTemplate $main_tpl = null
     ): PostingLightUI {
         return new PostingLightUI(
             $plugin,
             $type,
             $create_date,
             $title,
-            $text
+            $text,
+            $ui_fac,
+            $ui_ren,
+            $main_tpl
         );
     }
 

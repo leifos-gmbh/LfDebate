@@ -405,7 +405,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
     }
 
     /**
-     * @return UI\Component\Link\Link[]
+     * @return UI\Component\Link\Standard[]
      */
     protected function getAttachments(Posting $top_posting): array
     {

@@ -22,6 +22,8 @@ namespace Leifos\Debate;
 
 class CommentUI extends PostingUI
 {
+    use CommentRender;
+
     public const TYPE_INITIAL = "initial";
     public const TYPE_PRO = "pro";
     public const TYPE_CONTRA = "contra";

@@ -20,79 +20,14 @@ declare(strict_types=1);
 
 namespace Leifos\Debate;
 
-use ILIAS\UI\Component\Link\Link;
+use ILIAS\UI\Component\Button;
 use ILIAS\UI\Component\Symbol\Avatar\Avatar;
+use ILIAS\UI\Factory;
+use ILIAS\UI\Renderer;
 
 class PostingUI
 {
-    /**
-     * @var bool
-     */
-    protected $showpin;
-    /**
-     * @var string
-     */
-    protected $title_link;
-    /**
-     * @var \ilLfDebatePlugin
-     */
-    protected $plugin;
-    /**
-     * @var string
-     */
-    protected $type = "";
-    /**
-     * @var Avatar
-     */
-    protected $avatar;
-    /**
-     * @var string
-     */
-    protected $name = "";
-    /**
-     * @var string
-     */
-    protected $create_date = "";
-    /**
-     * @var string
-     */
-    protected $last_edit = "";
-    /**
-     * @var string
-     */
-    protected $title = "";
-    /**
-     * @var string
-     */
-    protected $text = "";
-    /**
-     * @var array
-     */
-    protected $actions = [];
-    /**
-     * @var Link[]
-     */
-    protected $attachments = [];
-    /**
-     * @var string
-     */
-    protected $glyph = "";
-    /**
-     * @var \ilLanguage
-     */
-    protected $lng;
-    /**
-     * @var \ILIAS\UI\Factory
-     */
-    protected $ui_fac;
-    /**
-     * @var \ILIAS\UI\Renderer
-     */
-    protected $ui_ren;
-    /**
-     * @var \ilTemplate
-     */
-    protected $main_tpl;
+    use PostingRender;
 
     public function __construct(
         \ilLfDebatePlugin $plugin,
@@ -104,7 +39,11 @@ class PostingUI
         string $title,
         string $text,
         string $title_link = "",
-        bool $showpin = false
+        bool $showpin = false,
+        ?\ilLanguage $lng = null,
+        ?Factory $ui_fac = null,
+        ?Renderer $ui_ren = null,
+        ?\ilTemplate $main_tpl = null
     ) {
         global $DIC;
 
@@ -119,24 +58,27 @@ class PostingUI
         $this->text = $text;
         $this->title_link = $title_link;
 
-        $this->lng = $DIC->language();
-        $this->ui_fac = $DIC->ui()->factory();
-        $this->ui_ren = $DIC->ui()->renderer();
-        $this->main_tpl = $DIC->ui()->mainTemplate();
+        $this->lng = ($lng) ?: $DIC->language();
+        $this->ui_fac = ($ui_fac) ?: $DIC->ui()->factory();
+        $this->ui_ren = ($ui_ren) ?: $DIC->ui()->renderer();
+        $this->main_tpl = ($main_tpl) ?: $DIC->ui()->mainTemplate();
     }
 
     public function withActions(array $actions): self
     {
+        foreach ($actions as $action) {
+            if (!$action instanceof Button\Shy) {
+                throw new \InvalidArgumentException("Actions must be instance of ILIAS\UI\Component\Button\Shy");
+            }
+        }
         $clone = clone($this);
         $clone->actions = $actions;
         return $clone;
     }
 
-    public function withAttachments(array $attachments): self
+    public function getActions(): array
     {
-        $clone = clone($this);
-        $clone->attachments = $attachments;
-        return $clone;
+        return $this->actions;
     }
 
     public function render(): string
@@ -185,16 +127,6 @@ class PostingUI
             }
             $tpl->setCurrentBlock("actions");
             $tpl->setVariable("ACTIONS", $action_html);
-            $tpl->parseCurrentBlock();
-        }
-    }
-
-    protected function maybeSetAttachments(\ilTemplate $tpl): void
-    {
-        if (count($this->attachments) > 0) {
-            $att_html = $this->ui_ren->render($this->ui_fac->listing()->unordered($this->attachments));
-            $tpl->setCurrentBlock("attachments");
-            $tpl->setVariable("ATTACHMENTS", $att_html);
             $tpl->parseCurrentBlock();
         }
     }
