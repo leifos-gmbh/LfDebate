@@ -40,6 +40,7 @@ class PostingUI
         string $text,
         string $title_link = "",
         bool $showpin = false,
+        int $comment_count = -1,
         ?\ilLanguage $lng = null,
         ?Factory $ui_fac = null,
         ?Renderer $ui_ren = null,
@@ -47,7 +48,6 @@ class PostingUI
     ) {
         global $DIC;
 
-        $this->showpin = $showpin;
         $this->plugin = $plugin;
         $this->type = $type;
         $this->avatar = $avatar;
@@ -57,6 +57,8 @@ class PostingUI
         $this->title = $title;
         $this->text = $text;
         $this->title_link = $title_link;
+        $this->showpin = $showpin;
+        $this->comment_count = $comment_count;
 
         $this->lng = ($lng) ?: $DIC->language();
         $this->ui_fac = ($ui_fac) ?: $DIC->ui()->factory();
@@ -88,6 +90,7 @@ class PostingUI
         $this->fillHTML($tpl);
         $this->maybeSetActions($tpl);
         $this->maybeSetAttachments($tpl);
+        $this->maybeSetCommentCount($tpl);
 
         return $tpl->get();
     }
@@ -127,6 +130,17 @@ class PostingUI
             }
             $tpl->setCurrentBlock("actions");
             $tpl->setVariable("ACTIONS", $action_html);
+            $tpl->parseCurrentBlock();
+        }
+    }
+
+    protected function maybeSetCommentCount(\ilTemplate $tpl): void
+    {
+        if ($this->comment_count >= 0) {
+            $comment_txt = $this->comment_count === 1 ? $this->plugin->txt("comment") : $this->plugin->txt("comments");
+            $comment_cnt_html = $this->comment_count . " " . $comment_txt;
+            $tpl->setCurrentBlock("comment_count");
+            $tpl->setVariable("COMMENT_CNT", $comment_cnt_html);
             $tpl->parseCurrentBlock();
         }
     }

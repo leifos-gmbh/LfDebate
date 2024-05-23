@@ -6,6 +6,7 @@ comment_created#:#Kommentar wurde hinzugefügt
 comment_deleted#:#Kommentar wurde gelöscht
 comment_of_to_posting#:#Kommentar von %1 auf Beitrag von %2
 comment_updated#:#Kommentar wurde aktualisiert
+comments#:#Kommentare
 confirm_deletion#:#Löschen bestätigen
 confirm_deletion_comment#:#Möchten Sie den Kommentar wirklich löschen? Bitte beachten Sie, dass die Antworten zum Kommentar auch gelöscht werden.
 confirm_deletion_posting#:#Möchten Sie den Beitrag wirklich löschen? Bitte beachten Sie, dass die Kommentare im Beitrag auch gelöscht werden.

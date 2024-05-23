@@ -27,14 +27,6 @@ use ILIAS\UI\Component\Symbol\Avatar\Avatar;
 trait PostingRender
 {
     /**
-     * @var bool
-     */
-    protected $showpin;
-    /**
-     * @var string
-     */
-    protected $title_link;
-    /**
      * @var \ilLfDebatePlugin
      */
     protected $plugin;
@@ -66,6 +58,18 @@ trait PostingRender
      * @var string
      */
     protected $text = "";
+    /**
+     * @var string
+     */
+    protected $title_link;
+    /**
+     * @var bool
+     */
+    protected $showpin;
+    /**
+     * @var int 
+     */
+    protected $comment_count = -1;
     /**
      * @var string
      */

@@ -6,6 +6,7 @@ comment_created#:#Comment has been added
 comment_deleted#:#Comment has bee deleted
 comment_of_to_posting#:#Comment by %1 as reply to posting by %2
 comment_updated#:#Comment has been updated
+comments#:#Comments
 confirm_deletion#:#Confirm Deletion
 confirm_deletion_comment#:#Do you really want to delete the comment? Please note that the replies to the comment will also be deleted.
 confirm_deletion_posting#:#Do you really want to delete the posting? Please note that the comments in the posting will also be deleted.

@@ -154,6 +154,12 @@ h3.debate-title {
     margin-bottom: 10px;
 }
 
+.debate-comment-count {
+    font-size: 1.4rem;
+    color: #6f6f6f;
+    margin: 0 8px 10px 8px;
+}
+
 .il-item.debate-comment .il-item.debate-comment {
     border: 0;
     background-color: #f7f7f7;

@@ -332,7 +332,9 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $last_edit,
             $posting->getTitle(),
             $posting->getDescription(),
-            $this->getTitleLink($posting)
+            $this->getTitleLink($posting),
+            false,
+            $this->posting_manager->getNumberOfCommentsAndSubCommentsOfPosting($posting->getId())
         );
 
         $actions = $this->getActions($posting);
