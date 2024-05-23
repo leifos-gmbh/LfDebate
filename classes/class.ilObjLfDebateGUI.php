@@ -293,8 +293,15 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
         $this->tabs->activateTab("content");
 
+        $top_postings = $this->posting_manager->getTopPostings($sorting->getCurrentSorting());
+
         $html = $this->gui->profileReminder($this->plugin)->render();
-        foreach ($this->posting_manager->getTopPostings($sorting->getCurrentSorting()) as $top_posting) {
+        $html .= "<h3>" .
+            str_replace("%1", (string) count($top_postings),
+                str_replace("%2", (string) $this->posting_manager->getNumberOfCommentsAndSubComments(), $this->txt("postings_with_comments"))
+            ) .
+            "</h3>";
+        foreach ($top_postings as $top_posting) {
             $posting_ui = $this->getPostingUI($top_posting);
             $html .= $posting_ui->render();
         }

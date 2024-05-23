@@ -135,6 +135,21 @@ class PostingManager
         return $this->getCommentsOfPosting($id);
     }
 
+    public function getNumberOfCommentsAndSubComments(): int
+    {
+        $all = [];
+        foreach ($this->getTopPostings(0) as $posting) {
+            foreach ($this->getCommentsOfPosting($posting->getId()) as $comment) {
+                $all[] = $comment;
+                foreach ($this->getSubCommentsOfComment($comment->getId()) as $sub_comment) {
+                    $all[] = $sub_comment;
+                }
+            }
+        }
+
+        return count($all);
+    }
+
     public function getPosting(int $id, ?int $version = null): Posting
     {
         if ($version === null) {
