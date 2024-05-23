@@ -51,7 +51,7 @@ class PostingDBRepo
             (string) $rec["type"],
             (string) $rec["create_date"],
             (int) $rec["version"],
-            (int) $rec["parent"] ?? 0
+            (int) ($rec["parent"] ?? 0)
         );
     }
 

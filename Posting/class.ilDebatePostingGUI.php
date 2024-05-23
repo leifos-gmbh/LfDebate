@@ -254,7 +254,7 @@ class ilDebatePostingGUI
     /**
      * @return PostingUI|CommentUI
      */
-    protected function getPostingBasics(Posting $posting, bool $comment = false)
+    protected function getPostingBasics(Posting $posting, bool $comment = false, bool $show_pin = true)
     {
         $user = new ilObjUser($posting->getUserId());
         $name = $user->getPublicName();
@@ -286,7 +286,7 @@ class ilDebatePostingGUI
                 $posting->getTitle(),
                 $posting->getDescription(),
                 "",
-                true
+                $show_pin
             );
         }
 
@@ -430,7 +430,29 @@ class ilDebatePostingGUI
             $this->ctrl->getLinkTarget($this, "showPosting")
         );
 
-        $this->tpl->setContent($this->ui_ren->render($this->initCommentForm($edit)));
+        // show parent of comment above form
+        $comment_id = $this->gui->request()->getCommentId();
+        if (!$edit) {
+            if ($comment_id) {
+                $comment = $this->posting_manager->getPosting($comment_id);
+                $posting_ui = $this->getPostingBasics($comment, true, false);
+            } else {
+                $posting = $this->posting_manager->getPosting($this->posting->getId());
+                $posting_ui = $this->getPostingBasics($posting, false, false);
+            }
+        } else {
+            $comment = $this->posting_manager->getPosting($comment_id);
+            if ($comment->getParent() > 0) {
+                $parent_comment = $this->posting_manager->getPosting($comment->getParent());
+                $posting_ui = $this->getPostingBasics($parent_comment, true, false);
+            } else {
+                $parent_posting = $this->posting_manager->getPosting($this->posting->getId());
+                $posting_ui = $this->getPostingBasics($parent_posting, false, false);
+            }
+        }
+        $posting_ui_html = $posting_ui->render() . "<br>";
+
+        $this->tpl->setContent($posting_ui_html . $this->ui_ren->render($this->initCommentForm($edit)));
     }
 
     protected function initCommentForm(bool $edit = false): Form
