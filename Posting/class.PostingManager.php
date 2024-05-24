@@ -78,9 +78,9 @@ class PostingManager
             $parr = [];
             $parr["posting"] = $posting;
             $parr["create_date"] = $posting->getCreateDate();
-            $parr["initial_creation"] = $post_repo->getInitialCreation($posting->getId());
+            $parr["initial_creation"] = $this->getInitialCreation($posting->getId());
             $parr["name"] = \ilUserUtil::getNamePresentation($posting->getUserId());
-            $parr["nr_comments"] = $post_repo->getNrOfComments($posting->getId());
+            $parr["nr_comments"] = $this->getNumberOfCommentsAndSubCommentsOfPosting($posting->getId());
             $all_arr[] = $parr;
         }
         switch ($sorting) {
