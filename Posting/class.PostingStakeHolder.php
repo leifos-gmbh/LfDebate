@@ -28,10 +28,7 @@ use ILIAS\ResourceStorage\Stakeholder\AbstractResourceStakeholder;
  */
 class PostingStakeHolder extends AbstractResourceStakeholder
 {
-    /**
-     * @var int
-     */
-    protected $owner = 6;
+    protected int $owner = 6;
 
     public function __construct(int $owner = 6)
     {

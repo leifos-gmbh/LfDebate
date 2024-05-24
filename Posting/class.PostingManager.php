@@ -24,31 +24,12 @@ use ILIAS\ResourceStorage;
 
 class PostingManager
 {
-    /**
-     * @var DataFactory
-     */
-    protected $data;
-    /**
-     * @var RepoFactory
-     */
-    protected $repo;
-    /**
-     * @var ResourceStorage\Services
-     */
-    protected $resource_storage;
-    /**
-     * @var DomainFactory
-     */
-    protected $domain;
-
-    /**
-     * @var int repository object id
-     */
-    protected $obj_id;
-    /**
-     * @var PostingStakeHolder
-     */
-    protected $stakeholder;
+    protected DataFactory $data;
+    protected RepoFactory $repo;
+    protected ResourceStorage\Services $resource_storage;
+    protected DomainFactory $domain;
+    protected int $obj_id;
+    protected PostingStakeHolder $stakeholder;
 
     public function __construct(
         DataFactory $data,
@@ -56,8 +37,7 @@ class PostingManager
         ResourceStorage\Services $resource_storage,
         DomainFactory $domain,
         int $obj_id
-    )
-    {
+    ) {
         $this->data = $data;
         $this->repo = $repo;
         $this->resource_storage = $resource_storage;
@@ -85,28 +65,28 @@ class PostingManager
         }
         switch ($sorting) {
             case Sorting::NAME_ASC:
-                $all_arr = \ilUtil::sortArray($all_arr, "name", "asc");
+                $all_arr = \ilArrayUtil::sortArray($all_arr, "name", "asc");
                 break;
             case Sorting::NAME_DESC:
-                $all_arr = \ilUtil::sortArray($all_arr, "name", "desc");
+                $all_arr = \ilArrayUtil::sortArray($all_arr, "name", "desc");
                 break;
             case Sorting::CREATION_ASC:
-                $all_arr = \ilUtil::sortArray($all_arr, "initial_creation", "asc");
+                $all_arr = \ilArrayUtil::sortArray($all_arr, "initial_creation", "asc");
                 break;
             case Sorting::CREATION_DESC:
-                $all_arr = \ilUtil::sortArray($all_arr, "initial_creation", "desc");
+                $all_arr = \ilArrayUtil::sortArray($all_arr, "initial_creation", "desc");
                 break;
             case Sorting::UPDATE_ASC:
-                $all_arr = \ilUtil::sortArray($all_arr, "create_date", "asc");
+                $all_arr = \ilArrayUtil::sortArray($all_arr, "create_date", "asc");
                 break;
             case Sorting::UPDATE_DESC:
-                $all_arr = \ilUtil::sortArray($all_arr, "create_date", "desc");
+                $all_arr = \ilArrayUtil::sortArray($all_arr, "create_date", "desc");
                 break;
             case Sorting::COMMENTS_ASC:
-                $all_arr = \ilUtil::sortArray($all_arr, "nr_comments", "asc");
+                $all_arr = \ilArrayUtil::sortArray($all_arr, "nr_comments", "asc");
                 break;
             case Sorting::COMMENTS_DESC:
-                $all_arr = \ilUtil::sortArray($all_arr, "nr_comments", "desc");
+                $all_arr = \ilArrayUtil::sortArray($all_arr, "nr_comments", "desc");
                 break;
         }
         return array_map(static function ($item) {
@@ -114,7 +94,7 @@ class PostingManager
         }, $all_arr);
     }
 
-    public function getInitialCreation(int $posting_id) : string
+    public function getInitialCreation(int $posting_id): string
     {
         return $this->repo->posting()->getInitialCreation($posting_id);
     }
@@ -191,7 +171,7 @@ class PostingManager
     }
 
     /**
-     * @param string[]  $file_ids
+     * @param string[] $file_ids
      */
     public function createTopPosting(
         string $title,
@@ -221,7 +201,7 @@ class PostingManager
     }
 
     /**
-     * @param string[]  $file_ids
+     * @param string[] $file_ids
      */
     public function createCommentPosting(
         int $parent_id,
@@ -254,7 +234,7 @@ class PostingManager
     }
 
     /**
-     * @param string[]   $new_file_ids
+     * @param string[] $new_file_ids
      */
     public function editPosting(
         Posting $posting,
@@ -378,11 +358,11 @@ class PostingManager
                 "sort" => $name["lastname"] . $name["firstname"]
             ];
         }
-        $contribs = \ilUtil::sortArray($contribs, "sort", "asc");
+        $contribs = \ilArrayUtil::sortArray($contribs, "sort", "asc");
         return $contribs;
     }
 
-    public function exportContributor(int $user_id) : void
+    public function exportContributor(int $user_id): void
     {
         $name = \ilObjUser::_lookupName($user_id);
 
@@ -395,7 +375,7 @@ class PostingManager
         );
     }
 
-    protected function getContributionsOfUserAsText(int $user_id) : string
+    protected function getContributionsOfUserAsText(int $user_id): string
     {
         $plugin = $this->domain->plugin();
         $post_repo = $this->repo->posting();
@@ -404,9 +384,7 @@ class PostingManager
         $name_line = $name["lastname"] . ", " . $name["firstname"];
         $text = "";
 
-        /** @var Posting $p */
         foreach ($post_repo->getContributionsOfUser($this->obj_id, $user_id) as $p) {
-
             $pad = "";
             $reference = "";
             $posting_type = $plugin->txt("posting");
@@ -456,7 +434,7 @@ class PostingManager
         return $text;
     }
 
-    protected function getTypeTitle(string $type) : string
+    protected function getTypeTitle(string $type): string
     {
         $plugin = $this->domain->plugin();
         switch ($type) {

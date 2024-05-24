@@ -31,22 +31,11 @@ class Sorting
     public const UPDATE_DESC = 6;
     public const COMMENTS_ASC = 7;
     public const COMMENTS_DESC = 8;
-    /**
-     * @var \ilObjLfDebate
-     */
-    protected $debate;
-    /**
-     * @var \ilRepositoryObjectPlugin
-     */
-    protected $plugin;
-    /**
-     * @var \ilLanguage
-     */
-    protected $lng;
-    /**
-     * @var DomainFactory
-     */
-    protected $domain;
+
+    protected \ilObjLfDebate $debate;
+    protected \ilRepositoryObjectPlugin $plugin;
+    protected \ilLanguage $lng;
+    protected DomainFactory $domain;
 
     public function __construct(
         DomainFactory $domain,
@@ -58,7 +47,7 @@ class Sorting
         $this->debate = $debate;
     }
 
-    public function getAllOptions() : array
+    public function getAllOptions(): array
     {
         return [
             self::NAME_ASC => $this->plugin->txt("sort_name_asc"),
@@ -72,18 +61,18 @@ class Sorting
         ];
     }
 
-    public function getSortLabel(int $sort)
+    public function getSortLabel(int $sort): string
     {
         $all = $this->getAllOptions();
         return $all[$sort] ?? "";
     }
 
-    public function setCurrentSorting(int $sort) : void
+    public function setCurrentSorting(int $sort): void
     {
         \ilSession::set("xdbt_sort", (string) $sort);
     }
 
-    public function getCurrentSorting() : int
+    public function getCurrentSorting(): int
     {
         $sort = (int) \ilSession::get("xdbt_sort");
         if ($sort === 0) {
@@ -91,5 +80,4 @@ class Sorting
         }
         return $sort;
     }
-
 }

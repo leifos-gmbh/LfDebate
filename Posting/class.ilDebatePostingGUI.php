@@ -26,6 +26,7 @@ use Leifos\Debate\Posting;
 use Leifos\Debate\PostingLightUI;
 use Leifos\Debate\PostingUI;
 use Leifos\Debate\PostingManager;
+use Leifos\Debate\RTE\RTEHelper;
 use ILIAS\ResourceStorage\Services as ResourceStorage;
 use ILIAS\UI;
 use ILIAS\UI\Component\Input\Container\Form\Form;
@@ -38,74 +39,26 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class ilDebatePostingGUI
 {
-    /**
-     * @var \Leifos\Debate\RTE\RTEHelper
-     */
-    protected $rte;
-    /**
-     * @var ilCtrl
-     */
-    protected $ctrl;
-    /**
-     * @var ilLanguage
-     */
-    protected $lng;
-    /**
-     * @var ilTabsGUI
-     */
-    protected $tabs;
-    /**
-     * @var ilGlobalTemplateInterface
-     */
-    protected $tpl;
-    /**
-     * @var ilLocatorGUI
-     */
-    protected $locator;
-    /**
-     * @var UI\Factory
-     */
-    protected $ui_fac;
-    /**
-     * @var UI\Renderer
-     */
-    protected $ui_ren;
-    /**
-     * @var ServerRequestInterface
-     */
-    protected $request;
-    /**
-     * @var ResourceStorage
-     */
-    protected $resource_storage;
-    /**
-     * @var PostingManager
-     */
-    protected $posting_manager;
-    /**
-     * @var DebateAccess
-     */
-    protected $access_wrapper;
-    /**
-     * @var GUIFactory
-     */
-    protected $gui;
-    /**
-     * @var ilObjLfDebate
-     */
-    protected $dbt_object;
-    /**
-     * @var ilLfDebatePlugin
-     */
-    protected $dbt_plugin;
-    /**
-     * @var Posting
-     */
-    protected $posting;
+    protected RTEHelper $rte;
+    protected ilCtrl $ctrl;
+    protected ilLanguage $lng;
+    protected ilTabsGUI $tabs;
+    protected ilGlobalTemplateInterface $tpl;
+    protected ilLocatorGUI $locator;
+    protected UI\Factory $ui_fac;
+    protected UI\Renderer $ui_ren;
+    protected ServerRequestInterface $request;
+    protected ResourceStorage $resource_storage;
+    protected PostingManager $posting_manager;
+    protected DebateAccess $access_wrapper;
+    protected GUIFactory $gui;
+    protected ilObjLfDebate $dbt_object;
+    protected ilLfDebatePlugin $dbt_plugin;
+    protected Posting $posting;
     /**
      * @var UI\Component\Component[]
      */
-    protected $ui_comps = [];
+    protected array $ui_comps = [];
 
     public function __construct(ilLfDebatePlugin $dbt_plugin, ilObjLfDebate $dbt_obj)
     {
@@ -126,7 +79,7 @@ class ilDebatePostingGUI
         $this->dbt_plugin = $dbt_plugin;
         $this->gui = $dbt_plugin->gui();
         $this->posting_manager = $dbt_plugin->domain()->posting($dbt_obj->getId());
-        $this->access_wrapper = $dbt_plugin->domain()->accessWrapper((int) $dbt_obj->getRefId());
+        $this->access_wrapper = $dbt_plugin->domain()->accessWrapper($dbt_obj->getRefId());
         $this->posting = $this->posting_manager->getPosting($this->gui->request()->getPostingId());
         $this->rte = $this->gui->rteHelper();
     }
@@ -487,7 +440,7 @@ class ilDebatePostingGUI
         $files = $this->ui_fac->input()->field()->file(
             new ilDebatePostingUploadHandlerGUI(),
             $this->lng->txt("attachments")
-        );
+        )->withMaxFiles(100);
         if ($edit) {
             $attachments = $this->posting_manager->getAttachmentsForPosting($comment->getId());
             $rids = [];
@@ -572,7 +525,7 @@ class ilDebatePostingGUI
         $this->ctrl->redirect($this, "showPosting");
     }
 
-    protected function deleteComment()
+    protected function deleteComment(): void
     {
         $comment_id = $this->gui->request()->getCommentId();
         if (!$this->access_wrapper->canDeletePostings()) {

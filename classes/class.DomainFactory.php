@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Leifos\Debate;
 
+use ILIAS\BackgroundTasks\BackgroundTaskServices;
 use ILIAS\DI\Container;
 use ILIAS\DI\RBACServices;
 use ILIAS\DI\LoggingServices;
@@ -30,22 +31,10 @@ use Leifos\Debate\Profile\ProfileChecker;
 
 class DomainFactory
 {
-    /**
-     * @var \ilRepositoryObjectPlugin
-     */
-    protected $plugin;
-    /**
-     * @var Container
-     */
-    protected $DIC;
-    /**
-     * @var DataFactory
-     */
-    protected $data;
-    /**
-     * @var RepoFactory
-     */
-    protected $repo;
+    protected \ilRepositoryObjectPlugin $plugin;
+    protected Container $DIC;
+    protected DataFactory $data;
+    protected RepoFactory $repo;
 
     public function __construct(
         Container $DIC,
@@ -74,7 +63,7 @@ class DomainFactory
         );
     }
 
-    public function profileChecker() : ProfileChecker
+    public function profileChecker(): ProfileChecker
     {
         return new ProfileChecker($this);
     }
@@ -88,12 +77,12 @@ class DomainFactory
         );
     }
 
-    public function sorting(\ilObjLfDebate $debate):Sorting
+    public function sorting(\ilObjLfDebate $debate): Sorting
     {
         return new Sorting($this, $debate);
     }
 
-    public function plugin():\ilRepositoryObjectPlugin
+    public function plugin(): \ilRepositoryObjectPlugin
     {
         return $this->plugin;
     }
@@ -167,12 +156,12 @@ class DomainFactory
         return $this->DIC["ilObjDataCache"];
     }
 
-    public function backgroundTasks(): \ILIAS\DI\BackgroundTaskServices
+    public function backgroundTasks(): BackgroundTaskServices
     {
         return $this->DIC->backgroundTasks();
     }
 
-    public function database() : \ilDBInterface
+    public function database(): \ilDBInterface
     {
         return $this->DIC->database();
     }

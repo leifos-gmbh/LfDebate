@@ -9,10 +9,7 @@ use Leifos\Debate\Sorting;
  */
 class SortingTest extends TestCase
 {
-    /**
-     * @var Sorting
-     */
-    protected $sorting;
+    protected Sorting $sorting;
 
     protected function setUp(): void
     {

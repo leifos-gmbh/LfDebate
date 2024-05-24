@@ -20,17 +20,14 @@ declare(strict_types=1);
 
 namespace Leifos\Debate;
 
-use ILIAS\DI\HTTPServices;
+use ILIAS\HTTP\Services as HTTPServices;
 use ILIAS\Refinery;
 
 class GUIRequest
 {
-    //use BaseGUIRequest;  // für ILIAS 9+
+    //use BaseGUIRequest;  // for ILIAS 9+
 
-    /**
-     * @var HTTPServices
-     */
-    protected $http;
+    protected HTTPServices $http;
 
     public function __construct(
         HTTPServices $http,
@@ -38,7 +35,7 @@ class GUIRequest
         ?array $passed_query_params = null,
         ?array $passed_post_data = null
     ) {
-        // wir können noch nicht den request wrapper in ILIAS 7 benutzen
+        // for ILIAS 9+
         /*
         $this->initRequest(
             $http,

@@ -29,10 +29,8 @@ class CommentUI extends PostingUI
     public const TYPE_CONTRA = "contra";
     public const TYPE_QUESTION = "question";
     public const TYPE_EXCLAMATION = "exclamation";
-    /**
-     * @var string
-     */
-    protected $sub_comments = "";
+
+    protected string $sub_comments = "";
 
     public function withSubComments(string $sub_comments): self
     {
@@ -41,7 +39,7 @@ class CommentUI extends PostingUI
         return $clone;
     }
 
-    public function render() : string
+    public function render(): string
     {
         $this->main_tpl->addCss(
             "./Customizing/global/plugins/Services/Repository/RepositoryObject/LfDebate/css/debate.css"

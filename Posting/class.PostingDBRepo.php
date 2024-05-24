@@ -22,20 +22,13 @@ namespace Leifos\Debate;
 
 class PostingDBRepo
 {
-    /**
-     * @var DataFactory
-     */
-    protected $data;
-    /**
-     * @var \ilDBInterface
-     */
-    protected $db;
+    protected DataFactory $data;
+    protected \ilDBInterface $db;
 
     public function __construct(
         DataFactory $data,
         \ilDBInterface $db
-    )
-    {
+    ) {
         $this->data = $data;
         $this->db = $db;
     }
@@ -91,7 +84,10 @@ class PostingDBRepo
         return $postings;
     }
 
-    public function getPosting(int $obj_id, int $id, int $version): ?Posting
+    /**
+     * @throws \ilPostingNotFoundException
+     */
+    public function getPosting(int $obj_id, int $id, int $version): Posting
     {
         $set = $this->db->queryF("SELECT * FROM xdbt_posting LEFT JOIN  xdbt_post_tree t ON (t.child = xdbt_posting.id) " .
             " WHERE id = %s AND version = %s ",
@@ -112,8 +108,7 @@ class PostingDBRepo
         string $description,
         string $type,
         string $date
-    ): int
-    {
+    ): int {
         $id = $this->db->nextId("xdbt_posting");
         $this->db->insert("xdbt_posting", [
             "id" => ["integer", $id],
@@ -125,7 +120,7 @@ class PostingDBRepo
             "version" => ["integer", 0]
         ]);
 
-        return (int) $id;
+        return $id;
     }
 
     public function createNewVersion(
@@ -160,8 +155,7 @@ class PostingDBRepo
         int $obj_id,
         int $id,
         int $parent_id = 0
-    ): void
-    {
+    ): void {
         $this->db->insert("xdbt_post_tree", [
             "xdbt_obj_id" => ["integer", $obj_id],
             "child" => ["text", $id],
@@ -200,7 +194,7 @@ class PostingDBRepo
         return 0;
     }
 
-    public function getInitialCreation(int $id)
+    public function getInitialCreation(int $id): string
     {
         $set = $this->db->queryF("SELECT MIN(create_date) as cd FROM xdbt_posting " .
             " WHERE id = %s",
@@ -211,7 +205,7 @@ class PostingDBRepo
         return $rec["cd"] ?? "";
     }
 
-    public function getNrOfComments(int $id) : int
+    public function getNrOfComments(int $id): int
     {
         $set = $this->db->queryF("SELECT child FROM xdbt_post_tree " .
             " WHERE parent = %s",
@@ -280,6 +274,9 @@ class PostingDBRepo
         );
     }
 
+    /**
+     * @return int[]
+     */
     public function getContributorIds(int $obj_id): array
     {
         $set = $this->db->queryF("SELECT DISTINCT p.user_id FROM xdbt_posting p JOIN xdbt_post_tree t ON (t.child = p.id)" .
@@ -294,6 +291,9 @@ class PostingDBRepo
         return $ids;
     }
 
+    /**
+     * @return Posting[]
+     */
     public function getContributionsOfUser(int $obj_id, int $user_id): array
     {
         $set = $this->db->queryF("SELECT * FROM xdbt_posting p JOIN xdbt_post_tree t ON (t.child = p.id) " .

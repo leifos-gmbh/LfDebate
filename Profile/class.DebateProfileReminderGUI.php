@@ -18,32 +18,26 @@
 
 declare(strict_types=1);
 
+use Leifos\Debate\DomainFactory;
+use Leifos\Debate\GUIFactory;
+
 class DebateProfileReminderGUI
 {
-    /**
-     * @var \Leifos\Debate\DomainFactory
-     */
-    protected $domain;
-    /**
-     * @var ilLfDebatePlugin
-     */
-    protected $plugin;
-
-    /**
-     * @var \Leifos\Debate\GUIFactory
-     */
-    protected $gui;
+    protected DomainFactory $domain;
+    protected ilLfDebatePlugin $plugin;
+    protected GUIFactory $gui;
 
     public function __construct(
         \Leifos\Debate\DomainFactory $domain,
         \Leifos\Debate\GUIFactory $gui,
-        \ilLfDebatePlugin $plugin) {
+        \ilLfDebatePlugin $plugin
+    ) {
         $this->gui = $gui;
         $this->plugin = $plugin;
         $this->domain = $domain;
     }
 
-    public function render() : string
+    public function render(): string
     {
         $checker = $this->domain->profileChecker();
         if ($checker->hasPublicProfile()) {
@@ -63,7 +57,8 @@ class DebateProfileReminderGUI
         $modal = $f->modal()->interruptive(
             $this->plugin->txt("profile_reminder"),
             $this->plugin->txt("profile_reminder_long"),
-            $ctrl->getLinkTargetByClass(ilObjLfDebateGUI::class, "openProfileSettings"))
+            $ctrl->getLinkTargetByClass(ilObjLfDebateGUI::class, "openProfileSettings")
+        )
             ->withActionButtonLabel("actButtonLabel");
         $signal = $modal->getShowSignal();
 

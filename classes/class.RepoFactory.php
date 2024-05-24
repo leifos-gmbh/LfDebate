@@ -22,14 +22,8 @@ namespace Leifos\Debate;
 
 class RepoFactory
 {
-    /**
-     * @var DataFactory
-     */
-    protected $data;
-    /**
-     * @var \ilDBInterface
-     */
-    protected $db;
+    protected DataFactory $data;
+    protected \ilDBInterface $db;
 
     public function __construct(
         DataFactory $data,

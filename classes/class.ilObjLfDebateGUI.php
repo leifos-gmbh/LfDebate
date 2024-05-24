@@ -24,6 +24,8 @@ use Leifos\Debate\PostingLightUI;
 use Leifos\Debate\PostingManager;
 use Leifos\Debate\PostingUI;
 use Leifos\Debate\GUIFactory;
+use Leifos\Debate\DomainFactory;
+use Leifos\Debate\RTE\RTEHelper;
 use ILIAS\ResourceStorage\Services as ResourceStorage;
 use ILIAS\UI;
 use ILIAS\UI\Component\Input\Container\Form\Form;
@@ -40,53 +42,26 @@ require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/
  */
 class ilObjLfDebateGUI extends ilObjectPluginGUI
 {
-    /**
-     * @var \Leifos\Debate\RTE\RTEHelper
-     */
-    protected $rte;
-    /**
-     * @var \Leifos\Debate\DomainFactory
-     */
-    protected $domain;
-    /**
-     * @var ilTemplate
-     */
-    protected $main_tpl;
-    /**
-     * @var PostingManager
-     */
-    protected $posting_manager;
-    /**
-     * @var DebateAccess
-     */
-    protected $access_wrapper;
-    /**
-     * @var GUIFactory
-     */
-    protected $gui;
-    /**
-     * @var UI\Factory
-     */
-    protected $ui_fac;
-    /**
-     * @var UI\Renderer
-     */
-    protected $ui_ren;
-    /**
-     * @var ServerRequestInterface
-     */
-    protected $request;
-    /**
-     * @var ResourceStorage
-     */
-    protected $resource_storage;
+    protected RTEHelper $rte;
+    protected DomainFactory $domain;
+    protected ilGlobalTemplateInterface $main_tpl;
+    protected PostingManager $posting_manager;
+    protected DebateAccess $access_wrapper;
+    protected GUIFactory $gui;
+    protected UI\Factory $ui_fac;
+    protected UI\Renderer $ui_ren;
+    protected ServerRequestInterface $request;
+    protected ResourceStorage $resource_storage;
     /**
      * @var UI\Component\Component[]
      */
-    protected $ui_comps = [];
+    protected array $ui_comps = [];
 
-    public function __construct($a_ref_id = 0, $a_id_type = self::REPOSITORY_NODE_ID, $a_parent_node_id = 0)
-    {
+    public function __construct(
+        int $a_ref_id = 0,
+        int $a_id_type = self::REPOSITORY_NODE_ID,
+        int $a_parent_node_id = 0
+    ) {
         global $DIC;
 
         parent::__construct($a_ref_id, $a_id_type, $a_parent_node_id);
@@ -103,7 +78,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->domain = $plugin->domain();
         if ($this->object) {
             $this->posting_manager = $plugin->domain()->posting($this->object->getId());
-            $this->access_wrapper = $plugin->domain()->accessWrapper((int) $this->object->getRefId());
+            $this->access_wrapper = $plugin->domain()->accessWrapper($this->object->getRefId());
         }
         $this->rte = $this->gui->rteHelper();
     }
@@ -133,7 +108,11 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         );
         switch ($next_class) {
             case "ildebatepostinggui":
-                $dbt_pos = new ilDebatePostingGUI($this->plugin, $this->object);
+                /** @var ilLfDebatePlugin $plugin */
+                $plugin = $this->plugin;
+                /** @var ilObjLfDebate $object */
+                $object = $this->object;
+                $dbt_pos = new ilDebatePostingGUI($plugin, $object);
                 $this->ctrl->setReturn($this, "showAllPostings");
                 //$this->ctrl->setParameterByClass("ildebatepostinggui", "post_id", $this->gui->request()->getPostingId());
                 $this->ctrl->saveParameterByClass("ildebatepostinggui", "post_id");
@@ -183,7 +162,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         return "showAllPostings";
     }
 
-    public function setTabs(): void
+    protected function setTabs(): void
     {
         if ($this->access_wrapper->canReadPostings()) {
             $this->tabs->addTab(
@@ -284,7 +263,9 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $this->gui->export($this->object->getId())->addExportButton($this->toolbar);
         }
 
-        $sorting = $this->domain->sorting($this->object);
+        /** @var ilObjLfDebate $object */
+        $object = $this->object;
+        $sorting = $this->domain->sorting($object);
         $sort = $this->ui_fac->viewControl()->sortation(
             $sorting->getAllOptions()
         )->withTargetURL($this->ctrl->getLinkTargetByClass(self::class, "sort") , 'sortation')
@@ -295,7 +276,9 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
         $top_postings = $this->posting_manager->getTopPostings($sorting->getCurrentSorting());
 
-        $html = $this->gui->profileReminder($this->plugin)->render();
+        /** @var ilLfDebatePlugin $plugin */
+        $plugin = $this->plugin;
+        $html = $this->gui->profileReminder($plugin)->render();
         $html .= "<h3>" .
             str_replace("%1", (string) count($top_postings),
                 str_replace("%2", (string) $this->posting_manager->getNumberOfCommentsAndSubComments(), $this->txt("postings_with_comments"))
@@ -435,7 +418,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         return $attachments;
     }
 
-    public function getTitleLink(Posting $top_posting) : string
+    public function getTitleLink(Posting $top_posting): string
     {
         $this->ctrl->setParameterByClass("ildebatepostinggui", "post_id", $top_posting->getId());
         if ($this->access_wrapper->canReadPostings()) {
@@ -509,7 +492,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $files = $this->ui_fac->input()->field()->file(
             new ilDebatePostingUploadHandlerGUI(),
             $this->lng->txt("attachments")
-        );
+        )->withMaxFiles(100);
         if ($edit) {
             $attachments = $this->posting_manager->getAttachmentsForPosting($posting->getId());
             $rids = [];
@@ -617,7 +600,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         }
     }
 
-    protected function deletePosting()
+    protected function deletePosting(): void
     {
         $posting_id = $this->gui->request()->getPostingId();
         if (!$this->access_wrapper->canDeletePostings()) {
@@ -629,13 +612,16 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         $this->ctrl->redirect($this, "showAllPostings");
     }
 
-    protected function sort() : void {
-        $sorting = $this->domain->sorting($this->object);
+    protected function sort(): void
+    {
+        /** @var ilObjLfDebate $object */
+        $object = $this->object;
+        $sorting = $this->domain->sorting($object);
         $sorting->setCurrentSorting($this->gui->request()->getSorting());
         $this->ctrl->redirect($this, "showAllPostings");
     }
 
-    public function exportContributor() : void
+    public function exportContributor(): void
     {
         if (!$this->access_wrapper->canExportPostings()) {
             return;
@@ -652,7 +638,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
         }
     }
 
-    public function openProfileSettings() : void
+    public function openProfileSettings(): void
     {
         $this->ctrl->redirectByClass([
             ilDashboardGUI::class,

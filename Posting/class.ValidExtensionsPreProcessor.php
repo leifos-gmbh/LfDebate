@@ -15,7 +15,7 @@ final class ValidExtensionsPreProcessor implements PreProcessor
     /**
      * @var string[]
      */
-    private $valid;
+    private array $valid;
 
     /**
      * Valid extensions example:

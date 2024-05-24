@@ -22,14 +22,8 @@ namespace Leifos\Debate;
 
 class AttachmentDBRepo
 {
-    /**
-     * @var DataFactory
-     */
-    protected $data;
-    /**
-     * @var \ilDBInterface
-     */
-    protected $db;
+    protected DataFactory $data;
+    protected \ilDBInterface $db;
 
     public function __construct(
         DataFactory $data,
@@ -50,7 +44,10 @@ class AttachmentDBRepo
         );
     }
 
-    public function getAttachment(int $id): ?Attachment
+    /**
+     * @throws \ilPostingNotFoundException
+     */
+    public function getAttachment(int $id): Attachment
     {
         $set = $this->db->queryF("SELECT * FROM xdbt_posting_att " .
             " WHERE id = %s",

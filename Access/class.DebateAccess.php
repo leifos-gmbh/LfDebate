@@ -27,18 +27,9 @@ namespace Leifos\Debate;
  */
 class DebateAccess
 {
-    /**
-     * @var \ilRbacSystem
-     */
-    protected $access;
-    /**
-     * @var int
-     */
-    protected $ref_id = 0;
-    /**
-     * @var int
-     */
-    protected $user_id = 0;
+    protected \ilRbacSystem $access;
+    protected int $ref_id = 0;
+    protected int $user_id = 0;
 
     public function __construct(\ilRbacSystem $access, int $ref_id, int $user_id)
     {

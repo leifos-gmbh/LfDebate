@@ -22,42 +22,15 @@ namespace Leifos\Debate;
 
 class Posting
 {
-    /**
-     * @var int
-     */
-    protected $parent;
-    /**
-     * @var int
-     */
-    protected $obj_id;
-    /**
-     * @var int
-     */
-    protected $id;
-    /**
-     * @var int
-     */
-    protected $user_id;
-    /**
-     * @var string
-     */
-    protected $title;
-    /**
-     * @var string
-     */
-    protected $description;
-    /**
-     * @var string
-     */
-    protected $type;
-    /**
-     * @var string
-     */
-    protected $create_date;
-    /**
-     * @var int
-     */
-    protected $version;
+    protected int $obj_id;
+    protected int $id;
+    protected int $user_id;
+    protected string $title;
+    protected string $description;
+    protected string $type;
+    protected string $create_date;
+    protected int $version;
+    protected int $parent;
 
     public function __construct(
         int $obj_id,

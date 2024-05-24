@@ -9,10 +9,7 @@ use Leifos\Debate\Posting;
  */
 class PostingTest extends TestCase
 {
-    /**
-     * @var Posting
-     */
-    protected $posting;
+    protected Posting $posting;
 
     protected function setUp(): void
     {

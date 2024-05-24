@@ -20,25 +20,17 @@ declare(strict_types=1);
 
 namespace Leifos\Debate\Export;
 
-use ILIAS\UI\Component\Button\Button;
 use Leifos\Debate\DomainFactory;
+use Leifos\Debate\GUIFactory;
+use ILIAS\UI\Component\Button\Button;
 use ILIAS\UI\Component\Deck\Deck;
 use ILIAS\UI\Component\Panel\Listing\Listing;
 
 class ExportGUI
 {
-    /**
-     * @var int
-     */
-    protected $obj_id;
-    /**
-     * @var DomainFactory
-     */
-    protected $domain;
-    /**
-     * @var \Leifos\Debate\GUIFactory
-     */
-    protected $gui;
+    protected int $obj_id = 0;
+    protected DomainFactory $domain;
+    protected GUIFactory $gui;
 
     public function __construct(
         DomainFactory $domain,
@@ -50,7 +42,7 @@ class ExportGUI
         $this->obj_id = $obj_id;
     }
 
-    public function addExportButton(\ilToolbarGUI $toolbar) : void
+    public function addExportButton(\ilToolbarGUI $toolbar): void
     {
         $f = $this->gui->ui()->factory();
         $pl = $this->domain->plugin();
@@ -69,7 +61,7 @@ class ExportGUI
         $toolbar->addComponent($modal);
     }
 
-    protected function getListing()
+    protected function getListing(): Deck
     {
         $f = $this->gui->ui()->factory();
         $ctrl = $this->gui->ctrl();

@@ -21,30 +21,19 @@ declare(strict_types=1);
 namespace Leifos\Debate;
 
 use ILIAS\DI\Container;
-use ILIAS\DI\HTTPServices;
+use ILIAS\HTTP\Services as HTTPServices;
 use ILIAS\UI\Component\Symbol\Avatar\Avatar;
 use ILIAS\UI\Factory;
 use ILIAS\UI\Renderer;
+use Leifos\Debate\Export\ExportGUI;
 use Leifos\Debate\RTE\RTEHelper;
 
 class GUIFactory
 {
-    /**
-     * @var Container
-     */
-    protected $DIC;
-    /**
-     * @var DataFactory
-     */
-    protected $data_factory;
-    /**
-     * @var DomainFactory
-     */
-    protected $domain_factory;
-    /**
-     * @var HTTPServices
-     */
-    protected $http;
+    protected Container $DIC;
+    protected DataFactory $data_factory;
+    protected DomainFactory $domain_factory;
+    protected HTTPServices $http;
 
     public function __construct(
         Container $DIC,
@@ -57,9 +46,9 @@ class GUIFactory
         $this->domain_factory = $domain_factory;
     }
 
-    public function export(int $obj_id): \Leifos\Debate\Export\ExportGUI
+    public function export(int $obj_id): ExportGUI
     {
-        return new \Leifos\Debate\Export\ExportGUI($this->domain_factory, $this, $obj_id);
+        return new ExportGUI($this->domain_factory, $this, $obj_id);
     }
 
     public function posting(
@@ -158,7 +147,7 @@ class GUIFactory
         );
     }
 
-    public function profileReminder(\ilLfDebatePlugin $plugin) : \DebateProfileReminderGUI {
+    public function profileReminder(\ilLfDebatePlugin $plugin): \DebateProfileReminderGUI {
         return new \DebateProfileReminderGUI(
             $this->domain_factory,
             $this,
@@ -166,12 +155,12 @@ class GUIFactory
         );
     }
 
-    public function rteHelper() : RTEHelper
+    public function rteHelper(): RTEHelper
     {
         return new RTEHelper();
     }
 
-    public function request() : GUIRequest
+    public function request(): GUIRequest
     {
         return new GUIRequest(
             $this->http,
@@ -179,12 +168,12 @@ class GUIFactory
         );
     }
 
-    public function ui() : \ILIAS\DI\UIServices
+    public function ui(): \ILIAS\DI\UIServices
     {
         return $this->DIC->ui();
     }
 
-    public function ctrl() : \ilCtrl
+    public function ctrl(): \ilCtrl
     {
         return $this->DIC->ctrl();
     }

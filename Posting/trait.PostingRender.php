@@ -26,78 +26,30 @@ use ILIAS\UI\Component\Symbol\Avatar\Avatar;
 
 trait PostingRender
 {
+    protected \ilLfDebatePlugin $plugin;
+    protected string $type = "";
+    protected Avatar $avatar;
+    protected string $name = "";
+    protected string $create_date = "";
+    protected string $last_edit = "";
+    protected string $title = "";
+    protected string $text = "";
+    protected string $title_link;
+    protected bool $showpin;
+    protected int $comment_count = -1;
+    protected string $glyph = "";
     /**
-     * @var \ilLfDebatePlugin
+     * @var Button\Shy[]
      */
-    protected $plugin;
-    /**
-     * @var string
-     */
-    protected $type = "";
-    /**
-     * @var Avatar
-     */
-    protected $avatar;
-    /**
-     * @var string
-     */
-    protected $name = "";
-    /**
-     * @var string
-     */
-    protected $create_date = "";
-    /**
-     * @var string
-     */
-    protected $last_edit = "";
-    /**
-     * @var string
-     */
-    protected $title = "";
-    /**
-     * @var string
-     */
-    protected $text = "";
-    /**
-     * @var string
-     */
-    protected $title_link;
-    /**
-     * @var bool
-     */
-    protected $showpin;
-    /**
-     * @var int 
-     */
-    protected $comment_count = -1;
-    /**
-     * @var string
-     */
-    protected $glyph = "";
-    /**
-     * @var Button\Shy
-     */
-    protected $actions = [];
+    protected array $actions = [];
     /**
      * @var Link\Standard[]
      */
-    protected $attachments = [];
-    /**
-     * @var \ilLanguage
-     */
-    protected $lng;
-    /**
-     * @var \ILIAS\UI\Factory
-     */
-    protected $ui_fac;
-    /**
-     * @var \ILIAS\UI\Renderer
-     */
-    protected $ui_ren;
-    /**
-     * @var \ilTemplate
-     */
-    protected $main_tpl;
+    protected array $attachments = [];
+    protected \ilLanguage $lng;
+    protected \ILIAS\UI\Factory $ui_fac;
+    protected \ILIAS\UI\Renderer $ui_ren;
+    protected \ilGlobalTemplateInterface $main_tpl;
 
     public function withAttachments(array $attachments): self
     {

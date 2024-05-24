@@ -8,10 +8,7 @@ use Leifos\Debate\Attachment;
  */
 class AttachmentTest extends TestCase
 {
-    /**
-     * @var Attachment
-     */
-    protected $attachment;
+    protected Attachment $attachment;
 
     protected function setUp(): void
     {

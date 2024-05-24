@@ -21,11 +21,10 @@ declare(strict_types=1);
 include_once("./Services/Repository/classes/class.ilRepositoryObjectPlugin.php");
 
 use ILIAS\DI\Container;
-use Leifos\Debate\RepoFactory;
 use Leifos\Debate\DataFactory;
-use ILIAS\UI\Implementation\DebateUIRenderer;
 use Leifos\Debate\DomainFactory;
 use Leifos\Debate\GUIFactory;
+use Leifos\Debate\RepoFactory;
 
 /**
  * @author Thomas Famula <famula@leifos.de>
@@ -90,18 +89,5 @@ class ilLfDebatePlugin extends ilRepositoryObjectPlugin
                 $this->data(),
                 $this->domain()
             );
-    }
-
-    public function exchangeUIRendererAfterInitialization(Container $dic): Closure
-    {
-        $renderer = $dic->raw('ui.renderer');
-
-        if (!$this->isActive()) {
-            return $renderer;
-        }
-
-        return function () use ($dic) {
-            return new DebateUIRenderer($dic["ui.component_renderer_loader"], $dic);
-        };
     }
 }

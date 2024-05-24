@@ -27,7 +27,7 @@ class RTEHelper
 
     }
 
-    public function getTextInputFromPost(int $nr) : string
+    public function getTextInputFromPost(int $nr): string
     {
         return \ilUtil::stripSlashes(
             $_POST["form_input_" . $nr],
@@ -36,7 +36,7 @@ class RTEHelper
         );
     }
 
-    public function initRTE() : void
+    public function initRTE(): void
     {
         $rte = new \ilTinyMCE();
         //$rte->setInitialWidth($this->getInitialRteWidth());
@@ -71,5 +71,4 @@ class RTEHelper
         $mt = $DIC->ui()->mainTemplate();
         $mt->addOnloadCode("setTimeout(() => {document.querySelector('.tox-tinymce--toolbar-sticky-off').style.height = '300px';}, 50); setTimeout(() => {document.querySelector('.tox-tinymce--toolbar-sticky-off').style.height = '300px';}, 200);");
     }
-
 }

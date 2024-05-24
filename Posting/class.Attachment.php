@@ -22,22 +22,10 @@ namespace Leifos\Debate;
 
 class Attachment
 {
-    /**
-     * @var int
-     */
-    protected $id;
-    /**
-     * @var int
-     */
-    protected $posting_id;
-    /**
-     * @var string
-     */
-    protected $rid = "";
-    /**
-     * @var int
-     */
-    protected $create_version = 0;
+    protected int $id = 0;
+    protected int $posting_id = 0;
+    protected string $rid = "";
+    protected int $create_version = 0;
 
     public function __construct(
         int $id,

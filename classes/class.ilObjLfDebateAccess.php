@@ -25,25 +25,24 @@ include_once("./Services/Repository/classes/class.ilObjectPluginAccess.php");
  */
 class ilObjLfDebateAccess extends ilObjectPluginAccess //implements ilConditionHandling            // -> wofür ist das?
 {
-
     /**
      * @inheritdoc
      */
-    public function _checkAccess($a_cmd, $a_permission, $a_ref_id, $a_obj_id, $a_user_id = 0): bool
+    public function _checkAccess(string $cmd, string $permission, int $ref_id, int $obj_id, ?int $user_id = null): bool
     {
         global $DIC;
 
         $ilUser = $DIC->user();
         $ilAccess = $DIC->access();
 
-        if ($a_user_id === 0) {
-            $a_user_id = $ilUser->getId();
+        if ($user_id === 0) {
+            $user_id = $ilUser->getId();
         }
 
-        switch ($a_permission) {
+        switch ($permission) {
             case "read":
-                if (!self::checkOnline((int) $a_obj_id) &&
-                    !$ilAccess->checkAccessOfUser($a_user_id, "write", "", $a_ref_id)) {
+                if (!self::checkOnline($obj_id) &&
+                    !$ilAccess->checkAccessOfUser($user_id, "write", "", $ref_id)) {
                     return false;
                 }
                 break;

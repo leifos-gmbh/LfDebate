@@ -57,8 +57,7 @@ class ilObjLfDebateListGUI extends ilObjectPluginListGUI
     {
         $props = [];
 
-        $this->plugin->includeClass("class.ilObjLfDebateAccess.php");
-        if (!ilObjLfDebateAccess::checkOnline((int) $this->obj_id)) {
+        if (!ilObjLfDebateAccess::checkOnline($this->obj_id)) {
             $props[] = [
                 "alert" => true,
                 "property" => $this->txt("status"),

@@ -36,14 +36,9 @@ use Leifos\Debate\ValidExtensionsPreProcessor;
  */
 class ilDebatePostingUploadHandlerGUI extends AbstractCtrlAwareUploadHandler
 {
-    /**
-     * @var ResourceStorage
-     */
-    private $storage;
-    /**
-     * @var PostingStakeHolder
-     */
-    private $stakeholder;
+    private ResourceStorage $storage;
+    private PostingStakeHolder $stakeholder;
+    protected ilFileServicesSettings $file_service_settings;
 
     public function __construct()
     {
@@ -51,11 +46,12 @@ class ilDebatePostingUploadHandlerGUI extends AbstractCtrlAwareUploadHandler
         parent::__construct();
         $this->storage = $DIC['resource_storage'];
         $this->stakeholder = new PostingStakeHolder();
+        $this->file_service_settings = $DIC->fileServiceSettings();
     }
 
     protected function getUploadResult(): HandlerResultInterface
     {
-        $this->upload->register(new ValidExtensionsPreProcessor(ilFileUtils::getValidExtensions()));
+        $this->upload->register(new ValidExtensionsPreProcessor($this->file_service_settings->getWhiteListedSuffixes()));
         $this->upload->process();
         /**
          * @var $result UploadResult

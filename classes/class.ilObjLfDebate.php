@@ -25,26 +25,20 @@ include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
  */
 class ilObjLfDebate extends ilObjectPlugin
 {
-    /**
-     * @var int
-     */
-    protected $default_sortation;
-    /**
-     * @var bool
-     */
-    protected $online = false;
+    protected int $default_sortation = 0;
+    protected bool $online = false;
 
     public function __construct(int $a_ref_id = 0)
     {
         parent::__construct($a_ref_id);
     }
 
-    final public function initType(): void
+    final protected function initType(): void
     {
         $this->setType(ilLfDebatePlugin::ID);
     }
 
-    public function doCreate(): void
+    protected function doCreate(bool $clone_mode = false): void
     {
         $ilDB = $this->db;
 
@@ -56,7 +50,7 @@ class ilObjLfDebate extends ilObjectPlugin
             ")");
     }
 
-    public function doRead(): void
+    protected function doRead(): void
     {
         $ilDB = $this->db;
 
@@ -69,7 +63,7 @@ class ilObjLfDebate extends ilObjectPlugin
         }
     }
 
-    public function doUpdate(): void
+    protected function doUpdate(): void
     {
         $ilDB = $this->db;
 
@@ -80,7 +74,7 @@ class ilObjLfDebate extends ilObjectPlugin
         );
     }
 
-    public function beforeDelete(): bool
+    protected function beforeDelete(): bool
     {
         /** @var \Leifos\Debate\PostingManager $posting_manager */
         $posting_manager = $this->getPlugin()->domain()->posting($this->getId());
@@ -90,7 +84,7 @@ class ilObjLfDebate extends ilObjectPlugin
         return parent::beforeDelete();
     }
 
-    public function doDelete(): void
+    protected function doDelete(): void
     {
         $ilDB = $this->db;
 
@@ -99,7 +93,7 @@ class ilObjLfDebate extends ilObjectPlugin
         );
     }
 
-    public function doCloneObject($new_obj, $a_target_id, $a_copy_id = null): void
+    protected function doCloneObject(ilObject2 $new_obj, int $a_target_id, ?int $a_copy_id = null): void
     {
         $new_obj->setOnline($this->isOnline());
         $new_obj->setDefaultSortation($this->getDefaultSortation());
@@ -116,12 +110,12 @@ class ilObjLfDebate extends ilObjectPlugin
         return $this->online;
     }
 
-    public function setDefaultSortation(int $a_val) : void
+    public function setDefaultSortation(int $a_val): void
     {
         $this->default_sortation = $a_val;
     }
 
-    public function getDefaultSortation() : int
+    public function getDefaultSortation(): int
     {
         return $this->default_sortation;
     }

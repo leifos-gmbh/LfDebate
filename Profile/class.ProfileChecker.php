@@ -24,17 +24,14 @@ use Leifos\Debate\DomainFactory;
 
 class ProfileChecker
 {
-    /**
-     * @var DomainFactory
-     */
-    protected $domain;
+    protected DomainFactory $domain;
 
     public function __construct(DomainFactory $domain)
     {
         $this->domain = $domain;
     }
 
-    public function hasPublicProfile() : bool
+    public function hasPublicProfile(): bool
     {
         $db = $this->domain->database();
         $user_id = $this->domain->user()->getId();
@@ -68,7 +65,7 @@ class ProfileChecker
         if (defined('ILIAS_MODULE')) {
             $webspace_dir = ('.' . $webspace_dir);
         }
-        $webspace_dir .= ('./' . ltrim(\ilUtil::getWebspaceDir(), "./"));
+        $webspace_dir .= ('./' . ltrim(\ilFileUtils::getWebspaceDir(), "./"));
 
         $image_dir = $webspace_dir . '/usr_images';
         $uploaded_file = $image_dir . '/usr_' . $user_id . '.jpg';
@@ -76,12 +73,12 @@ class ProfileChecker
         return ($has_public_upload && $has_public_profile && is_file($uploaded_file));
     }
 
-    public function setTimestamp() : void
+    public function setTimestamp(): void
     {
         \ilObjUser::_writePref($this->domain->user()->getId(), "xdbt_profile_remind", date("Ymd"));
     }
 
-    public function hasBeenReminded() : bool
+    public function hasBeenReminded(): bool
     {
         $rem = \ilObjUser::_lookupPref($this->domain->user()->getId(), "xdbt_profile_remind");
         if ($rem === date("Ymd")) {
