@@ -432,6 +432,17 @@ class ilDebatePostingGUI
 
         // show parent of comment above form
         $comment_id = $this->gui->request()->getCommentId();
+        $parent = $this->getParentOfComment($comment_id, $edit);
+        $posting_ui_html = $parent->render() . "<br>";
+
+        $this->tpl->setContent($posting_ui_html . $this->ui_ren->render($this->initCommentForm($edit)));
+    }
+
+    /**
+     * @return CommentUI|PostingUI
+     */
+    protected function getParentOfComment(int $comment_id, bool $edit = false)
+    {
         if (!$edit) {
             if ($comment_id) {
                 $comment = $this->posting_manager->getPosting($comment_id);
@@ -450,9 +461,8 @@ class ilDebatePostingGUI
                 $posting_ui = $this->getPostingBasics($parent_posting, false, false);
             }
         }
-        $posting_ui_html = $posting_ui->render() . "<br>";
 
-        $this->tpl->setContent($posting_ui_html . $this->ui_ren->render($this->initCommentForm($edit)));
+        return $posting_ui;
     }
 
     protected function initCommentForm(bool $edit = false): Form
@@ -536,9 +546,9 @@ class ilDebatePostingGUI
         if ($this->request->getMethod() === "POST") {
             $form = $form->withRequest($this->request);
             $data = $form->getData();
+            $comment_id = $this->gui->request()->getCommentId();
             if (isset($data["props"]) && is_array($data["props"])) {
                 $props = $data["props"];
-                $comment_id = $this->gui->request()->getCommentId();
                 if ($edit) {
                     $comment = $this->posting_manager->getPosting($comment_id);
                     $this->posting_manager->editPosting(
@@ -560,7 +570,9 @@ class ilDebatePostingGUI
                     $this->tpl->setOnScreenMessage("success", $this->dbt_plugin->txt("comment_created"), true);
                 }
             } else {
-                $this->tpl->setContent($this->ui_ren->render($form));
+                $parent = $this->getParentOfComment($comment_id, $edit);
+                $posting_ui_html = $parent->render() . "<br>";
+                $this->tpl->setContent($posting_ui_html . $this->ui_ren->render($form));
                 $this->tabs->clearTargets();
                 $this->tabs->setBackTarget(
                     $this->lng->txt("back"),
