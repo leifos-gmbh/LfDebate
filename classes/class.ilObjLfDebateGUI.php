@@ -563,7 +563,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
 
     protected function savePosting(bool $edit = false): void
     {
-        $form = $this->initPostingForm();
+        $form = $this->initPostingForm($edit);
         $posting_id = $this->gui->request()->getPostingId();
         $posting_mode = $this->gui->request()->getPostingMode();
         if ($this->request->getMethod() === "POST") {

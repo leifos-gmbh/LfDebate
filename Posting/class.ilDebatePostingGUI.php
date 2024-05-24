@@ -532,7 +532,7 @@ class ilDebatePostingGUI
 
     protected function saveComment(bool $edit = false): void
     {
-        $form = $this->initCommentForm();
+        $form = $this->initCommentForm($edit);
         if ($this->request->getMethod() === "POST") {
             $form = $form->withRequest($this->request);
             $data = $form->getData();
