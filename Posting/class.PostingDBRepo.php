@@ -205,6 +205,9 @@ class PostingDBRepo
         return $rec["cd"] ?? "";
     }
 
+    /**
+     * Count comments one level lower
+     */
     public function getNrOfComments(int $id): int
     {
         $set = $this->db->queryF("SELECT child FROM xdbt_post_tree " .
