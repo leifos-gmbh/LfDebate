@@ -281,7 +281,7 @@ class ilDebatePostingGUI
             $delete_modal = $this->ui_fac->modal()->interruptive(
                 $this->dbt_plugin->txt("confirm_deletion"),
                 $this->dbt_plugin->txt("confirm_deletion_posting"),
-                $this->ctrl->getFormActionByClass("ilobjlfdebategui", "deletePosting")
+                $this->ctrl->getLinkTargetByClass("ilobjlfdebategui", "deletePosting")
             )->withAffectedItems([$item]);
             $this->ui_comps[] = $delete_modal;
             $actions[] = $this->ui_fac->button()->shy($this->lng->txt("delete"), "")
@@ -322,7 +322,7 @@ class ilDebatePostingGUI
             $delete_modal = $this->ui_fac->modal()->interruptive(
                 $this->dbt_plugin->txt("confirm_deletion"),
                 $this->dbt_plugin->txt("confirm_deletion_comment"),
-                $this->ctrl->getFormAction($this, "deleteComment")
+                $this->ctrl->getLinkTarget($this, "deleteComment")
             )->withAffectedItems([$item]);
             $this->ui_comps[] = $delete_modal;
             $actions[] = $this->ui_fac->button()->shy($this->lng->txt("delete"), "")
@@ -497,7 +497,7 @@ class ilDebatePostingGUI
                     $this->posting_manager->editPosting(
                         $comment,
                         $props["title"],
-                        $this->rte->getTextInputFromPost(3),
+                        $this->rte->getTextInputFromPost(2),
                         $props["files"] ?? []
                     );
                     $this->tpl->setOnScreenMessage("success", $this->dbt_plugin->txt("comment_updated"), true);
@@ -506,7 +506,7 @@ class ilDebatePostingGUI
                     $this->posting_manager->createCommentPosting(
                         $parent_id,
                         $props["title"],
-                        $this->rte->getTextInputFromPost(3),
+                        $this->rte->getTextInputFromPost(2),
                         $props["type"],
                         $props["files"] ?? []
                     );

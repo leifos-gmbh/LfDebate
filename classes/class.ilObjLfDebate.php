@@ -18,8 +18,6 @@
 
 declare(strict_types=1);
 
-include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
-
 /**
  * @author Thomas Famula <famula@leifos.de>
  */

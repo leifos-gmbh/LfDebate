@@ -50,31 +50,31 @@ class GUIRequest
 
     public function getPostingId(): int
     {
-        return (int) $this->http->request()->getQueryParams()["post_id"];
+        return (int) ($this->http->request()->getQueryParams()["post_id"] ?? 0);
     }
 
     public function getCommentId(): int
     {
-        return (int) $this->http->request()->getQueryParams()["cmt_id"];
+        return (int) ($this->http->request()->getQueryParams()["cmt_id"] ?? 0);
     }
 
     public function getPostingMode(): bool
     {
-        return (bool) $this->http->request()->getQueryParams()["post_mode"];
+        return (bool) ($this->http->request()->getQueryParams()["post_mode"] ?? 0);
     }
 
     public function getSorting(): int
     {
-        return (int) $this->http->request()->getQueryParams()["sortation"];
+        return (int) ($this->http->request()->getQueryParams()["sortation"] ?? 0);
     }
 
     public function getContributor(): int
     {
-        return (int) $this->http->request()->getQueryParams()["contrib"];
+        return (int) ($this->http->request()->getQueryParams()["contrib"] ?? 0);
     }
 
     public function getResourceID(): string
     {
-        return (string) $this->http->request()->getQueryParams()["rid"];
+        return (string) ($this->http->request()->getQueryParams()["rid"] ?? "");
     }
 }

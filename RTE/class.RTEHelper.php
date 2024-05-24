@@ -30,7 +30,7 @@ class RTEHelper
     public function getTextInputFromPost(int $nr): string
     {
         return \ilUtil::stripSlashes(
-            $_POST["form_input_" . $nr],
+            $_POST["form/input_0/input_" . $nr],
             true,
             "<strong><em><br><p><ol><li><ul>"
         );

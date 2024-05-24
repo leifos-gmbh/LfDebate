@@ -31,9 +31,6 @@ use ILIAS\UI;
 use ILIAS\UI\Component\Input\Container\Form\Form;
 use Psr\Http\Message\ServerRequestInterface;
 
-include_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
-require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/LfDebate/classes/class.ilLfDebatePlugin.php");
-
 /**
  * @author Thomas Famula <famula@leifos.de>
  *
@@ -385,7 +382,7 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
             $delete_modal = $this->ui_fac->modal()->interruptive(
                 $this->txt("confirm_deletion"),
                 $this->txt("confirm_deletion_posting"),
-                $this->ctrl->getFormAction($this, "deletePosting")
+                $this->ctrl->getLinkTarget($this, "deletePosting")
             )->withAffectedItems([$item]);
             $this->ui_comps[] = $delete_modal;
             $actions[] = $this->ui_fac->button()->shy($this->lng->txt("delete"), "")
@@ -560,14 +557,14 @@ class ilObjLfDebateGUI extends ilObjectPluginGUI
                     $this->posting_manager->editPosting(
                         $posting,
                         $props["title"],
-                        $this->rte->getTextInputFromPost(3),
+                        $this->rte->getTextInputFromPost(2),
                         $props["files"] ?? []
                     );
                     $this->tpl->setOnScreenMessage("success", $this->txt("posting_updated"), true);
                 } else {
                     $this->posting_manager->createTopPosting(
                         $props["title"],
-                        $this->rte->getTextInputFromPost(3),
+                        $this->rte->getTextInputFromPost(2),
                         $props["files"] ?? []
                     );
                     $this->tpl->setOnScreenMessage("success", $this->txt("posting_created"), true);

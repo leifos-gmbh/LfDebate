@@ -18,8 +18,6 @@
 
 declare(strict_types=1);
 
-include_once("./Services/Repository/classes/class.ilRepositoryObjectPlugin.php");
-
 use ILIAS\DI\Container;
 use Leifos\Debate\DataFactory;
 use Leifos\Debate\DomainFactory;
