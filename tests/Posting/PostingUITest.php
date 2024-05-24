@@ -57,6 +57,7 @@ class PostingUITest extends TestCase
             "text",
             "",
             false,
+            -1,
             $this->getMockBuilder(\ilLanguage::class)->disableOriginalConstructor()->getMock(),
             $this->getMockBuilder(Factory::class)->disableOriginalConstructor()->getMock(),
             $this->getMockBuilder(Renderer::class)->disableOriginalConstructor()->getMock(),
