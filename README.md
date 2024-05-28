@@ -2,14 +2,14 @@
 
 ## Requirements
 
-- ILIAS: 7.0+
+- ILIAS: 7.x
 
 ## Installation
 
 ```
 mkdir -p Customizing/global/plugins/Services/Repository/RepositoryObject
 cd Customizing/global/plugins/Services/Repository/RepositoryObject
-git clone https://github.com/leifos-gmbh/LfDebate.git
+git clone --branch release_7 https://github.com/leifos-gmbh/LfDebate.git
 ```
 
 Back in main directory:
