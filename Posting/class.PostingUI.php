@@ -103,10 +103,16 @@ class PostingUI
             ? $this->glyph . $this->title
             : "<a href='" . $this->title_link . "'>" . $this->glyph . $this->title . "</a>";
         $tpl->setVariable("NAME", $this->name);
-        $tpl->setVariable("DATE", $this->create_date);
+        $tpl->setVariable("DATE", \ilDatePresentation::formatDate(
+            new \ilDateTime($this->create_date, IL_CAL_DATETIME)
+        ));
         if ($this->last_edit !== "") {
             $tpl->setCurrentBlock("edit");
-            $tpl->setVariable("EDIT", $this->lng->txt("last_change") . " " . $this->last_edit);
+            $tpl->setVariable("EDIT", $this->lng->txt("last_change") . " " .
+                \ilDatePresentation::formatDate(
+                    new \ilDateTime($this->last_edit, IL_CAL_DATETIME)
+                )
+            );
             $tpl->parseCurrentBlock();
         }
         $tpl->setVariable("TITLE", $title);

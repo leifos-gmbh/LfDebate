@@ -66,7 +66,9 @@ class PostingLightUI
     protected function fillHTML(\ilTemplate $tpl): void
     {
         $tpl->setVariable("TYPE", $this->type);
-        $tpl->setVariable("DATE", $this->create_date);
+        $tpl->setVariable("DATE", \ilDatePresentation::formatDate(
+            new \ilDateTime($this->create_date, IL_CAL_DATETIME)
+        ));
         $tpl->setVariable("TITLE", $this->title);
         $tpl->setVariable("TEXT", ($this->text));
     }
